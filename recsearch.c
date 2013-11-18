@@ -6,11 +6,13 @@
  * $Id$
  */
 
+#include "search_menu.h"
+
 #include <vdr/plugin.h>
 
 static const char *VERSION        = "0.0.1";
-static const char *DESCRIPTION    = "search your recordings";
-static const char *MAINMENUENTRY  = "Recsearch";
+static const char *DESCRIPTION    = tr("search your recordings");
+static const char *MAINMENUENTRY  = tr("search recordings");
 
 class cPluginRecsearch : public cPlugin {
 private:
@@ -105,7 +107,7 @@ time_t cPluginRecsearch::WakeupTime(void)
 cOsdObject *cPluginRecsearch::MainMenuAction(void)
 {
   // Perform the action when selected from the main VDR menu.
-  return NULL;
+  return new recsearch::cSearchMenu();
 }
 
 cMenuSetupPage *cPluginRecsearch::SetupMenu(void)
