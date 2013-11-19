@@ -7,6 +7,7 @@
  */
 
 #include "search_menu.h"
+#include "local_search.h"
 
 #include <vdr/plugin.h>
 
@@ -67,6 +68,7 @@ bool cPluginRecsearch::ProcessArgs(int argc, char *argv[])
 bool cPluginRecsearch::Initialize(void)
 {
   // Initialize any background activities the plugin shall perform.
+  new recsearch::cLocalSearch();
   return true;
 }
 

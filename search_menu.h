@@ -1,7 +1,9 @@
-#ifndef search_menu_h
-#define search_menu_h
+#ifndef recsearch_search_menu_h
+#define recsearch_search_menu_h
 
 #include <vdr/osdbase.h>
+
+#include "search_provider.h"
 
 
 namespace recsearch
@@ -11,7 +13,7 @@ namespace recsearch
   class cSearchMenu : public cOsdMenu
   {
   private:
-    char  search_term[RECSEARCH_MAX_LEN];
+    char  _search_term[RECSEARCH_MAX_LEN];
 
   public:
     cSearchMenu(void);
@@ -20,17 +22,19 @@ namespace recsearch
     virtual eOSState ProcessKey(eKeys Key);
   };
 
-  class cSearchResult : public cOsdMenu
+  class cSearchResult : public cOsdMenu, public cSearchHost
   {
   private:
+    cOsdItem   *_info;
+    cSearchParameter _parameter;
 
   public:
     cSearchResult(const char *SearchTerm);
     virtual ~cSearchResult(void);
 
     virtual eOSState ProcessKey(eKeys Key);
+    virtual void  SearchDone(void);
   };
 }
 
 #endif
-
