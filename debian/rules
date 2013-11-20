@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+#DH_VERBOSE=1
+
+.PHONY: override_dh_strip override_dh_auto_install
+
+override_dh_strip:
+	dh_strip --dbg-package=vdr-plugin-recsearch-dbg
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/vdr-plugin-recsearch
+
+%:
+	dh $@
+
