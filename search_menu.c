@@ -1,6 +1,6 @@
 #include "search_menu.h"
 
-#include <vdr/menuitems.h>
+#include <vdr/menu.h>
 
 
 recsearch::cSearchMenu::cSearchMenu(void)
@@ -61,7 +61,12 @@ eOSState recsearch::cSearchResult::ProcessKey(eKeys Key)
   eOSState state = cOsdMenu::ProcessKey(Key);
   if (state == osUnknown) {
      if (Key == kOk) {
-        return osEnd;
+        int i = Current();
+        if ((i >= 0) && (i < _parameter._result.Count())) {
+           cReplayControl::SetRecording(_parameter._result.Get(i)->FileName());
+           return osReplay;
+           }
+        return osBack;
         }
      }
   return state;
