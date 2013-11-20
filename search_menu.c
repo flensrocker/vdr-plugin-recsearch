@@ -107,6 +107,38 @@ eOSState cMenuRecording::ProcessKey(eKeys Key)
 }
 
 
+// --- cSearchResultItem -----------------------------------------------------
+
+class cSearchResultItem : public cOsdItem {
+private:
+  cRecording *recording;
+public:
+  cSearchResultItem(cRecording *Recording);
+  ~cSearchResultItem();
+  cRecording *Recording(void) { return recording; }
+  virtual void SetMenuItem(cSkinDisplayMenu *DisplayMenu, int Index, bool Current, bool Selectable);
+  };
+
+cSearchResultItem::cSearchResultItem(cRecording *Recording)
+{
+  recording = Recording;
+  if (Recording->Info()->ShortText())
+     SetText(*cString::sprintf("%s~%s", Recording->Info()->Title(), Recording->Info()->ShortText()));
+  else
+     SetText(Recording->Info()->Title());
+}
+
+cSearchResultItem::~cSearchResultItem()
+{
+}
+
+void cSearchResultItem::SetMenuItem(cSkinDisplayMenu *DisplayMenu, int Index, bool Current, bool Selectable)
+{
+  if (!DisplayMenu->SetItemRecording(recording, Index, Current, Selectable, -1, 0, 0))
+     DisplayMenu->SetItem(Text(), Index, Current, Selectable);
+}
+
+
 // --- cSearchResult ---------------------------------------------------------
 
 recsearch::cSearchResult::cSearchResult(const char *SearchTerm)
@@ -190,12 +222,8 @@ void  recsearch::cSearchResult::SearchDone(void)
      SetHelp(NULL);
      }
   else {
-     for (cRecording *r = _parameter._result.First(); r; r = _parameter._result.Next(r)) {
-         if (r->Info()->ShortText() == NULL)
-            Add(new cOsdItem(r->Info()->Title()));
-         else
-            Add(new cOsdItem(*cString::sprintf("%s~%s", r->Info()->Title(), r->Info()->ShortText())));
-         }
+     for (cRecording *r = _parameter._result.First(); r; r = _parameter._result.Next(r))
+         Add(new cSearchResultItem(r));
      SetHelp(trVDR("Button$Play"), trVDR("Button$Rewind"), NULL, trVDR("Button$Info"));
      }
   Display();
