@@ -18,6 +18,12 @@ void recsearch::cLocalSearch::OnSearch(cSearchParameter *Parameter)
       if (info == NULL)
          continue;
 
+      if ((Parameter->_search_status == 1) && !r->IsNew())
+         continue;
+
+      if ((Parameter->_search_status == 2) && !r->IsEdited())
+         continue;
+
       text = info->Title();
       if ((text != NULL) && (strcasestr(text, Parameter->_search_term) != NULL)) {
          Parameter->AddResult(r);

@@ -11,8 +11,14 @@ recsearch::cSearchMenu::cSearchMenu(void)
  : cOsdMenu(tr("search recordings"), 12)
 {
   memset(_search_term, 0, RECSEARCH_MAX_LEN);
+  _status = 0;
+  _status_item[0] = tr("all");
+  _status_item[1] = tr("only new");
+  _status_item[2] = tr("only edited");
+
   SetMenuCategory(mcPlugin);
   Add(new cMenuEditStrItem(tr("search term"), _search_term, RECSEARCH_MAX_LEN, NULL));
+  Add(new cMenuEditStraItem(tr("status"),    &_status, 3, _status_item));
 }
 
 recsearch::cSearchMenu::~cSearchMenu(void)
@@ -28,9 +34,11 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
        case kOk:
         {
           compactspace(_search_term);
-          if (_search_term[0] != 0) {
-             isyslog("recsearch: searching for %s", _search_term);
-             return AddSubMenu(new cSearchResult(_search_term));
+          if ((_search_term[0] != 0) || (_status != 0)) {
+             isyslog("recsearch: searching for %s, status = %d", _search_term, _status);
+             _parameter._search_term = _search_term;
+             _parameter._search_status = _status;
+             return AddSubMenu(new cSearchResult(&_parameter));
              }
           return osBack;
         }
@@ -141,16 +149,17 @@ void cSearchResultItem::SetMenuItem(cSkinDisplayMenu *DisplayMenu, int Index, bo
 
 // --- cSearchResult ---------------------------------------------------------
 
-recsearch::cSearchResult::cSearchResult(const char *SearchTerm)
+recsearch::cSearchResult::cSearchResult(cSearchParameter *Parameter)
  : cOsdMenu(tr("search result"))
+ ,_parameter(Parameter)
 {
   SetTitle(tr("searching..."));
   SetMenuCategory(mcRecording);
   Display();
 
-  _parameter._host = this;
-  _parameter._search_term = SearchTerm;
-  cSearchProvider::StartSearch(&_parameter);
+  _parameter->_host = this;
+  _parameter->_result.Clear();
+  cSearchProvider::StartSearch(_parameter);
 }
 
 recsearch::cSearchResult::~cSearchResult(void)
@@ -161,8 +170,8 @@ recsearch::cSearchResult::~cSearchResult(void)
 cRecording *recsearch::cSearchResult::GetSelectedRecording(void)
 {
   int i = Current();
-  if ((i >= 0) && (i < _parameter._result.Count()))
-     return _parameter._result.Get(i);
+  if ((i >= 0) && (i < _parameter->_result.Count()))
+     return _parameter->_result.Get(i);
   return NULL;
 }
 
@@ -216,13 +225,19 @@ eOSState recsearch::cSearchResult::ProcessKey(eKeys Key)
 
 void  recsearch::cSearchResult::SearchDone(void)
 {
-  SetTitle(*cString::sprintf("%s: %s", tr("search result"), *_parameter._search_term));
-  if (_parameter._result.Count() == 0) {
+  cString title = cString::sprintf("%s: %s", tr("search result"), *_parameter->_search_term);
+  if (_parameter->_search_status == 1)
+     title = cString::sprintf("%s, %s", *title, tr("only new"));
+  else if (_parameter->_search_status == 2)
+     title = cString::sprintf("%s, %s", *title, tr("only edited"));
+  SetTitle(*title);
+
+  if (_parameter->_result.Count() == 0) {
      Add(new cOsdItem(tr("nothing found"), osUnknown, false));
      SetHelp(NULL);
      }
   else {
-     for (cRecording *r = _parameter._result.First(); r; r = _parameter._result.Next(r))
+     for (cRecording *r = _parameter->_result.First(); r; r = _parameter->_result.Next(r))
          Add(new cSearchResultItem(r));
      SetHelp(trVDR("Button$Play"), trVDR("Button$Rewind"), NULL, trVDR("Button$Info"));
      }
