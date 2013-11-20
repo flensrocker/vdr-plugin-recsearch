@@ -25,7 +25,6 @@ namespace recsearch
   class cSearchResult : public cOsdMenu, public cSearchHost
   {
   private:
-    cOsdItem   *_info;
     cSearchParameter _parameter;
 
   public:

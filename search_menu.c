@@ -41,13 +41,12 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
 recsearch::cSearchResult::cSearchResult(const char *SearchTerm)
  : cOsdMenu(tr("search result"))
 {
-  SetTitle(*cString::sprintf("%s: %s", tr("search result"), SearchTerm));
+  SetTitle(tr("searching..."));
   SetMenuCategory(mcRecording);
-  _info = new cOsdItem(tr("searching..."), osUnknown, false);
-  Add(_info);
+  Display();
 
   _parameter._host = this;
-  _parameter._search_terms.Append(strdup(SearchTerm));
+  _parameter._search_term = SearchTerm;
   cSearchProvider::StartSearch(&_parameter);
 }
 
@@ -60,15 +59,28 @@ recsearch::cSearchResult::~cSearchResult(void)
 eOSState recsearch::cSearchResult::ProcessKey(eKeys Key)
 {
   eOSState state = cOsdMenu::ProcessKey(Key);
+  if (state == osUnknown) {
+     if (Key == kOk) {
+        return osEnd;
+        }
+     }
   return state;
 }
 
 void  recsearch::cSearchResult::SearchDone(void)
 {
-  Del(0);
-  _info = NULL;
-  for (cRecording *r = _parameter._result.First(); r; r = _parameter._result.Next(r)) {
-      Add(new cOsdItem(r->Info()->Title()));
-      }
+  dsyslog("recsearch: cSearchResult::SearchDone");
+  SetTitle(*cString::sprintf("%s: %s", tr("search result"), *_parameter._search_term));
+  if (_parameter._result.Count() == 0) {
+     Add(new cOsdItem(tr("nothing found"), osUnknown, false));
+     }
+  else {
+     for (cRecording *r = _parameter._result.First(); r; r = _parameter._result.Next(r)) {
+         if (r->Info()->ShortText() == NULL)
+            Add(new cOsdItem(r->Info()->Title()));
+         else
+            Add(new cOsdItem(*cString::sprintf("%s~%s", r->Info()->Title(), r->Info()->ShortText())));
+         }
+     }
   Display();
 }

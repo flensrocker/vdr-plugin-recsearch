@@ -3,11 +3,11 @@
 
 void  recsearch::cSearchParameter::AddResult(cRecording *Recording)
 {
-  if (Recording == NULL)
+  if ((Recording == NULL) || (Recording->FileName() == NULL))
      return;
 
   _mutex.Lock();
-  _result.Add(Recording);
+  _result.Add(new cRecording(Recording->FileName()));
   isyslog("recsearch: found \"%s\"", Recording->Info()->Title());
   _mutex.Unlock();
 }
@@ -36,6 +36,9 @@ void  recsearch::cSearchProvider::StopSearch(void)
   _parameter->_mutex.Lock();
   for (cSearchProvider *sp = _providers.First(); sp; sp = _providers.Next(sp))
       sp->Cancel(-1);
+  _parameter->_mutex.Lock();
+  cCondWait::SleepMs(1000);
+  _parameter->_mutex.Unlock();
   for (cSearchProvider *sp = _providers.First(); sp; sp = _providers.Next(sp))
       sp->Cancel(3);
   _parameter->_mutex.Unlock();
