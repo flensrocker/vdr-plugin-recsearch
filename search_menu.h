@@ -27,6 +27,11 @@ namespace recsearch
   private:
     cSearchParameter _parameter;
 
+    cRecording *GetSelectedRecording(void);
+    eOSState Play(void);
+    eOSState Rewind(void);
+    eOSState Info(void);
+
   public:
     cSearchResult(const char *SearchTerm);
     virtual ~cSearchResult(void);
