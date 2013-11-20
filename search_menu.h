@@ -13,7 +13,11 @@ namespace recsearch
   class cSearchMenu : public cOsdMenu
   {
   private:
-    char  _search_term[RECSEARCH_MAX_LEN];
+    char        _search_term[RECSEARCH_MAX_LEN];
+    int         _status; // 0 = all, 1 = only new, 2 = only edited
+    const char *_status_item[3];
+
+    cSearchParameter _parameter;
 
   public:
     cSearchMenu(void);
@@ -25,7 +29,7 @@ namespace recsearch
   class cSearchResult : public cOsdMenu, public cSearchHost
   {
   private:
-    cSearchParameter _parameter;
+    cSearchParameter *_parameter;
 
     cRecording *GetSelectedRecording(void);
     eOSState Play(void);
@@ -33,7 +37,7 @@ namespace recsearch
     eOSState Info(void);
 
   public:
-    cSearchResult(const char *SearchTerm);
+    cSearchResult(cSearchParameter *Parameter);
     virtual ~cSearchResult(void);
 
     virtual eOSState ProcessKey(eKeys Key);

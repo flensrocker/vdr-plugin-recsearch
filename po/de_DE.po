@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-recsearch 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2013-11-20 20:38+0100\n"
+"POT-Creation-Date: 2013-11-20 23:50+0100\n"
 "PO-Revision-Date: 2013-11-18 19:15+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,8 +22,20 @@ msgstr "durchsuche deine Aufnahmen"
 msgid "search recordings"
 msgstr "durchsuche Aufnahmen"
 
+msgid "all"
+msgstr "alle"
+
+msgid "only new"
+msgstr "nur neue"
+
+msgid "only edited"
+msgstr "nur geschnittene"
+
 msgid "search term"
 msgstr "Suchbegriff"
+
+msgid "status"
+msgstr "Status"
 
 msgid "search result"
 msgstr "Suchergebnis"

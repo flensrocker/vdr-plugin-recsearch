@@ -17,7 +17,10 @@ namespace recsearch
   public:
     cMutex         _mutex;
     cSearchHost   *_host;
+
     cString        _search_term;
+    int            _search_status;
+
     cRecordings    _result;
     int            _count;
 
