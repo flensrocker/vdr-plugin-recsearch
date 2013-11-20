@@ -17,7 +17,6 @@ recsearch::cSearchMenu::cSearchMenu(void)
 
 recsearch::cSearchMenu::~cSearchMenu(void)
 {
-  dsyslog("recsearch: ~cSearchMenu");
 }
 
 eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
@@ -30,7 +29,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
         {
           compactspace(_search_term);
           if (_search_term[0] != 0) {
-             isyslog("recsearch: search for %s", _search_term);
+             isyslog("recsearch: searching for %s", _search_term);
              return AddSubMenu(new cSearchResult(_search_term));
              }
           return osBack;
@@ -124,7 +123,6 @@ recsearch::cSearchResult::cSearchResult(const char *SearchTerm)
 
 recsearch::cSearchResult::~cSearchResult(void)
 {
-  dsyslog("recsearch: ~cSearchResult");
   cSearchProvider::StopSearch();
 }
 
@@ -186,7 +184,6 @@ eOSState recsearch::cSearchResult::ProcessKey(eKeys Key)
 
 void  recsearch::cSearchResult::SearchDone(void)
 {
-  dsyslog("recsearch: cSearchResult::SearchDone");
   SetTitle(*cString::sprintf("%s: %s", tr("search result"), *_parameter._search_term));
   if (_parameter._result.Count() == 0) {
      Add(new cOsdItem(tr("nothing found"), osUnknown, false));

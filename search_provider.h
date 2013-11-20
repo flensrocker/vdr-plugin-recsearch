@@ -34,15 +34,18 @@ namespace recsearch
     static cList<cSearchProvider>  _providers;
     static cSearchParameter*       _parameter;
 
+    cString  _name;
+
   public:
     static void  StartSearch(cSearchParameter *Parameter);
     static void  StopSearch(void);
 
-    cSearchProvider(void);
+    cSearchProvider(const char *Name);
     virtual ~cSearchProvider(void);
 
-    virtual void Action(void);
+    const char *Name(void) const { return *_name; };
 
+    virtual void Action(void);
     virtual void OnSearch(cSearchParameter *Parameter) = 0;
   };
 }

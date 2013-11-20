@@ -9,6 +9,8 @@ namespace recsearch
   class cLocalSearch : public cSearchProvider
   {
   public:
+    cLocalSearch(void) : cSearchProvider(tr("local-search")) {};
+    virtual ~cLocalSearch(void) {};
     virtual void OnSearch(cSearchParameter *Parameter);
   };
 }

@@ -38,4 +38,5 @@ void recsearch::cLocalSearch::OnSearch(cSearchParameter *Parameter)
          continue;
          }
       }
+  dsyslog("recsearch/local-search: done");
 }
