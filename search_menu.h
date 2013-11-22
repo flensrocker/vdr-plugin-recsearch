@@ -3,7 +3,7 @@
 
 #include <vdr/osdbase.h>
 
-#include "search_provider.h"
+#include "search_parameter.h"
 
 
 namespace recsearch
@@ -24,24 +24,6 @@ namespace recsearch
     virtual ~cSearchMenu(void);
 
     virtual eOSState ProcessKey(eKeys Key);
-  };
-
-  class cSearchResult : public cOsdMenu, public cSearchHost
-  {
-  private:
-    cSearchParameter *_parameter;
-
-    cRecording *GetSelectedRecording(void);
-    eOSState Play(void);
-    eOSState Rewind(void);
-    eOSState Info(void);
-
-  public:
-    cSearchResult(cSearchParameter *Parameter);
-    virtual ~cSearchResult(void);
-
-    virtual eOSState ProcessKey(eKeys Key);
-    virtual void  SearchDone(void);
   };
 }
 
