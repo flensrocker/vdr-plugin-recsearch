@@ -18,7 +18,7 @@ namespace recsearch
 
   public:
     cSearchMenuLoad(cSearches &Searches, cSearchParameter &Parameter)
-    :cOsdMenu(tr("load search"), 12)
+    :cOsdMenu(tr("load search template"), 12)
     ,_searches(Searches)
     ,_parameter(Parameter)
     {
@@ -62,6 +62,7 @@ recsearch::cSearchMenu::cSearchMenu(void)
   SetMenuCategory(mcPlugin);
   Add(new cMenuEditStrItem(tr("search term"), _data._term, RECSEARCH_TERM_MAX_LEN, NULL));
   Add(new cMenuEditStraItem(tr("status"), &_data._status, 3, cSearchParameter::_status_text));
+  Add(new cMenuEditIntItem(tr("younger than days"), &_data._younger_than_days, 0, INT_MAX, tr("whatever")));
 
   SetHelp(tr("Button$Save"), tr("Button$Find"), tr("Button$Delete"), tr("Button$Load"));
 }
@@ -96,7 +97,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
             cSearches::Searches.Add(p);
             cSearches::Searches.Save();
             }
-         Skins.Message(mtInfo, tr("search has been saved"));
+         Skins.Message(mtInfo, tr("search template has been saved"));
          break;
         }
        case kGreen:
@@ -109,13 +110,13 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
         }
        case kYellow:
         {
-         if (Interface->Confirm(tr("delete shown search?"))) {
+         if (Interface->Confirm(tr("delete shown search template?"))) {
             cSearches::Searches.LoadSearches();
             cSearchParameter *p = cSearches::Searches.Contains(_data);
             if (p != NULL) {
                cSearches::Searches.Del(p);
                cSearches::Searches.Save();
-               Skins.Message(mtInfo, tr("search was deleted from file"));
+               Skins.Message(mtInfo, tr("search template was deleted from file"));
                }
             else {
                _data.Clear();
@@ -129,7 +130,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
         {
          cSearches::Searches.LoadSearches();
          if (cSearches::Searches.Count() == 0) {
-            Skins.Message(mtInfo, tr("you have to save a search first"));
+            Skins.Message(mtInfo, tr("you have to save a search template first"));
             return osContinue;
             }
          _needs_refresh = true;
