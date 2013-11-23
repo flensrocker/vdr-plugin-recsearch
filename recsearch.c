@@ -67,6 +67,7 @@ bool cPluginRecsearch::ProcessArgs(int argc, char *argv[])
 bool cPluginRecsearch::Initialize(void)
 {
   // Initialize any background activities the plugin shall perform.
+  recsearch::cSearches::Searches._searches_file = cString::sprintf("%s/searches.conf", cPlugin::ConfigDirectory("recsearch"));
   return true;
 }
 

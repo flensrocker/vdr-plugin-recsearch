@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-recsearch 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2013-11-23 17:06+0100\n"
+"POT-Creation-Date: 2013-11-23 20:33+0100\n"
 "PO-Revision-Date: 2013-11-18 19:15+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,14 +22,41 @@ msgstr "durchsuche deine Aufnahmen"
 msgid "search recordings"
 msgstr "durchsuche Aufnahmen"
 
+msgid "load search"
+msgstr "Lade Suche"
+
 msgid "search term"
 msgstr "Suchbegriff"
 
 msgid "status"
 msgstr "Status"
 
+msgid "Button$Save"
+msgstr "Speichern"
+
 msgid "Button$Find"
 msgstr "Finde"
+
+msgid "Button$Delete"
+msgstr "Löschen"
+
+msgid "Button$Load"
+msgstr "Laden"
+
+msgid "search has been saved"
+msgstr "Suche wurde gespeichert"
+
+msgid "enter something I can search for"
+msgstr "gib etwas ein, nach dem ich suchen kann"
+
+msgid "delete shown search?"
+msgstr "angezeigte Suche löschen?"
+
+msgid "search was deleted from file"
+msgstr "Suche wurde aus der Datei gelöscht"
+
+msgid "you have to save a search first"
+msgstr "zuerst muss eine Suche gespeichert werden"
 
 msgid "all"
 msgstr "alle"
@@ -39,3 +66,6 @@ msgstr "nur neue"
 
 msgid "only edited"
 msgstr "nur geschnittene"
+
+msgid "invalid"
+msgstr "ungültig"

@@ -14,12 +14,13 @@ namespace recsearch
   {
   private:
     cSearchParameter _data;
-    cSearchParameter _parameter;
+    bool  _needs_refresh;
 
   public:
     cSearchMenu(void);
     virtual ~cSearchMenu(void);
 
+    virtual void Display(void);
     virtual eOSState ProcessKey(eKeys Key);
   };
 }
