@@ -1,3 +1,9 @@
+vdr-plugin-recsearch (0.0.6) precise; urgency=medium
+
+  * new upstream release
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sat, 23 Nov 2013 21:57:30 +0100
+
 vdr-plugin-recsearch (0.0.5) precise; urgency=medium
 
   * new upstream release
