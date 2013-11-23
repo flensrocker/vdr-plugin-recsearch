@@ -13,10 +13,7 @@ namespace recsearch
   class cSearchMenu : public cOsdMenu
   {
   private:
-    char        _search_term[RECSEARCH_MAX_LEN];
-    int         _status; // 0 = all, 1 = only new, 2 = only edited
-    const char *_status_item[3];
-
+    cSearchParameter _data;
     cSearchParameter _parameter;
 
   public:
