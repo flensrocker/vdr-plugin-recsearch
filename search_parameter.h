@@ -17,6 +17,7 @@ namespace recsearch
 
     mutable char _term[RECSEARCH_TERM_MAX_LEN];
     int _status; // 0 = all, 1 = only new, 2 = only edited
+    int _younger_than_days; // only used if > 0
 
   public:
     cSearchParameter(void);

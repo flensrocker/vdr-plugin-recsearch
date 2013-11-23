@@ -106,6 +106,7 @@ recsearch::cSearchParameter::cSearchParameter(const cSearchParameter &Parameter)
 {
   memcpy(_term, Parameter._term, RECSEARCH_TERM_MAX_LEN);
   _status = Parameter._status;
+  _younger_than_days = Parameter._younger_than_days;
 }
 
 recsearch::cSearchParameter::~cSearchParameter(void)
@@ -118,10 +119,10 @@ int recsearch::cSearchParameter::Compare(const cListObject &ListObject) const
   int cmp = strcasecmp(_term, rhs._term);
   if (cmp != 0)
      return cmp;
-  if (_status < rhs._status)
-     return -1;
-  if (_status > rhs._status)
-     return 1;
+  if (_status != rhs._status)
+     return _status - rhs._status;
+  if (_younger_than_days != rhs._younger_than_days)
+     return _younger_than_days - rhs._younger_than_days;
   return 0;
 }
 
@@ -139,8 +140,16 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording)
   if ((_status == 2) && !Recording->IsEdited())
      return false;
 
+  if (_younger_than_days > 0) {
+     // trim to 0:00 of today before subtraction (1 day == 86400 sec)
+     time_t limit = (time(NULL) / 86400 - _younger_than_days) * 86400;
+     time_t start = Recording->Start();
+     if (start < limit)
+        return false;
+     }
+
   if (isempty(_term)) {
-     if (_status != 0)
+     if ((_status > 0) || (_younger_than_days > 0))
         return true;
      return false;
      }
@@ -168,13 +177,14 @@ void recsearch::cSearchParameter::Clear(void)
 {
   memset(_term, 0, RECSEARCH_TERM_MAX_LEN);
   _status = 0;
+  _younger_than_days = 0;
 }
 
 bool recsearch::cSearchParameter::IsValid(void) const
 {
-  if (_status < 0)
+  if ((_status < 0) || (_younger_than_days < 0))
      return false;
-  if ((_status > 0) && (_status < 3))
+  if (((_status > 0) && (_status < 3)) || (_younger_than_days > 0))
      return true;
   compactspace(_term);
   return !isempty(_term);
@@ -195,6 +205,10 @@ bool recsearch::cSearchParameter::Parse(const char *s)
   if ((value != NULL) && isnumber(value))
      _status = atoi(value);
 
+  value = helper.Get("youngerthandays");
+  if ((value != NULL) && isnumber(value))
+     _younger_than_days = atoi(value);
+
   return IsValid();
 }
 
@@ -210,18 +224,23 @@ cString recsearch::cSearchParameter::ToString(void) const
   cString esc_term("");
   if (!isempty(_term))
      esc_term = strescape(_term, "\\,");
-  return cString::sprintf("term=%s,status=%d",
+  return cString::sprintf("term=%s,status=%d,youngerthandays=%d",
                           *esc_term,
-                          _status);
+                          _status,
+                          _younger_than_days);
 }
 
 cString recsearch::cSearchParameter::ToText(void) const
 {
   if (!IsValid())
      return tr("invalid");
-  return cString::sprintf("%s=%s, %s=%s",
+  cString younger("");
+  if (_younger_than_days > 0) // TRANSLATORS: note the leading comma and the %d for the number of days
+     younger = cString::sprintf(tr(", younger than %d days"), _younger_than_days);
+  return cString::sprintf("%s=%s, %s=%s%s",
                        tr("search term"), _term,
-                       tr("status"), _status_text[_status]);
+                       tr("status"), _status_text[_status],
+                       *younger);
 }
 
 
