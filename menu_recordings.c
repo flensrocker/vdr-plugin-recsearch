@@ -152,6 +152,8 @@ recsearch::cMenuRecordings::~cMenuRecordings()
 {
   helpKeys = -1;
   free(base);
+  if (filter)
+     delete filter;
 }
 
 void recsearch::cMenuRecordings::SetHelpKeys(void)

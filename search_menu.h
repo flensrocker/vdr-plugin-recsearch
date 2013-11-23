@@ -13,16 +13,14 @@ namespace recsearch
   class cSearchMenu : public cOsdMenu
   {
   private:
-    char        _search_term[RECSEARCH_MAX_LEN];
-    int         _status; // 0 = all, 1 = only new, 2 = only edited
-    const char *_status_item[3];
-
-    cSearchParameter _parameter;
+    cSearchParameter _data;
+    bool  _needs_refresh;
 
   public:
     cSearchMenu(void);
     virtual ~cSearchMenu(void);
 
+    virtual void Display(void);
     virtual eOSState ProcessKey(eKeys Key);
   };
 }

@@ -11,6 +11,8 @@ namespace recsearch
 {
 class cRecordingFilter {
 public:
+  cRecordingFilter(void) {};
+  virtual ~cRecordingFilter(void) {};
   virtual bool Filter(const cRecording *Recording) = 0;
   };
 

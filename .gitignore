@@ -1,0 +1,5 @@
+.dependencies
+libvdr-recsearch.so
+po/recsearch.pot
+*.o
+po/*.mo
