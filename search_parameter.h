@@ -40,12 +40,16 @@ namespace recsearch
 
   class cSearches : public cConfig<cSearchParameter>
   {
-  public:
-    static cSearches Searches;
-    cString  _searches_file;
+  private:
+    cString  _filename;
 
+  public:
+    static cSearches Last;
+    static cSearches Searches;
+
+    void SetFilename(const cString &Filename) { _filename = Filename; };
     cSearchParameter *Contains(const cSearchParameter &Parameter) const;
-    bool LoadSearches(void) { return Load(*_searches_file, false, false); };
+    bool LoadSearches(void);
   };
 }
 

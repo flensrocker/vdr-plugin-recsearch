@@ -56,7 +56,7 @@ msgid "enter something I can search for"
 msgstr "gib etwas ein, nach dem ich suchen kann"
 
 msgid "delete shown search template?"
-msgstr "Suchvorlage aus der Datei löschen?"
+msgstr "Angezeigte Suchvorlage löschen?"
 
 msgid "search template was deleted from file"
 msgstr "Suchvorlage wurde aus der Datei gelöscht"

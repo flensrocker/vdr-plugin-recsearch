@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.0.6";
+static const char *VERSION        = "0.0.7";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 
@@ -67,7 +67,9 @@ bool cPluginRecsearch::ProcessArgs(int argc, char *argv[])
 bool cPluginRecsearch::Initialize(void)
 {
   // Initialize any background activities the plugin shall perform.
-  recsearch::cSearches::Searches._searches_file = cString::sprintf("%s/searches.conf", cPlugin::ConfigDirectory("recsearch"));
+  cString config_directory = cPlugin::ConfigDirectory("recsearch");
+  recsearch::cSearches::Last.SetFilename(cString::sprintf("%s/last.conf", *config_directory));
+  recsearch::cSearches::Searches.SetFilename(cString::sprintf("%s/searches.conf", *config_directory));
   return true;
 }
 
