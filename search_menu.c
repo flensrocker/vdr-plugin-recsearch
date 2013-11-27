@@ -60,6 +60,10 @@ recsearch::cSearchMenu::cSearchMenu(void)
 ,_needs_refresh(false)
 {
   SetMenuCategory(mcPlugin);
+
+  if (cSearches::Last.LoadSearches() && (cSearches::Last.Count() > 0))
+     _data = *cSearches::Last.Get(0);
+
   Add(new cMenuEditStrItem(tr("search term"), _data._term, RECSEARCH_TERM_MAX_LEN, NULL));
   Add(new cMenuEditStraItem(tr("status"), &_data._status, 3, cSearchParameter::_status_text));
   Add(new cMenuEditIntItem(tr("younger than days"), &_data._younger_than_days, 0, INT_MAX, tr("whatever")));
@@ -91,10 +95,8 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
        case kRed:
         {
          cSearches::Searches.LoadSearches();
-         cSearchParameter *p = cSearches::Searches.Contains(_data);
-         if (p == NULL) {
-            p = new cSearchParameter(_data);
-            cSearches::Searches.Add(p);
+         if (cSearches::Searches.Contains(_data) == NULL) {
+            cSearches::Searches.Add(new cSearchParameter(_data));
             cSearches::Searches.Save();
             }
          Skins.Message(mtInfo, tr("search template has been saved"));
@@ -103,8 +105,12 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
        case kGreen:
        case kOk:
         {
-          if (_data.IsValid())
+          if (_data.IsValid()) {
+             cSearches::Last.cList<cSearchParameter>::Clear();
+             cSearches::Last.Add(new cSearchParameter(_data));
+             cSearches::Last.Save();
              return AddSubMenu(new cMenuRecordings(NULL, -1, false, new cSearchParameter(_data)));
+             }
           Skins.Message(mtError, tr("enter something I can search for"));
           return osContinue;
         }

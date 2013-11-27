@@ -244,6 +244,7 @@ cString recsearch::cSearchParameter::ToText(void) const
 }
 
 
+recsearch::cSearches recsearch::cSearches::Last;
 recsearch::cSearches recsearch::cSearches::Searches;
 
 recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParameter &Parameter) const
@@ -253,4 +254,11 @@ recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParamet
          return p;
       }
   return NULL;
+}
+
+bool recsearch::cSearches::LoadSearches(void)
+{
+  if ((*_filename == NULL) || isempty(*_filename))
+     return false;
+  return Load(*_filename, false, false);
 }
