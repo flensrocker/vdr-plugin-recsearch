@@ -67,6 +67,7 @@ recsearch::cSearchMenu::cSearchMenu(void)
   Add(new cMenuEditStrItem(tr("search term"), _data._term, RECSEARCH_TERM_MAX_LEN, NULL));
   Add(new cMenuEditStraItem(tr("status"), &_data._status, 3, cSearchParameter::_status_text));
   Add(new cMenuEditIntItem(tr("younger than days"), &_data._younger_than_days, 0, INT_MAX, tr("whatever")));
+  Add(new cMenuEditIntItem(tr("hot key"), &_data._hot_key, 0, 9, tr("no hot key")));
 
   SetHelp(tr("Button$Save"), tr("Button$Find"), tr("Button$Delete"), tr("Button$Load"));
 }
@@ -92,6 +93,23 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
 
   if (state == osUnknown) {
      switch (Key) {
+       case k1:
+       case k2:
+       case k3:
+       case k4:
+       case k5:
+       case k6:
+       case k7:
+       case k8:
+       case k9:
+        {
+         int hotkey = Key - k0;
+         cSearches::Searches.LoadSearches();
+         cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
+         if (p != NULL)
+            return AddSubMenu(new cMenuRecordings(NULL, -1, false, new cSearchParameter(*p)));
+         break;
+        }
        case kRed:
         {
          cSearches::Searches.LoadSearches();

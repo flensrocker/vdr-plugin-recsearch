@@ -107,6 +107,7 @@ recsearch::cSearchParameter::cSearchParameter(const cSearchParameter &Parameter)
   memcpy(_term, Parameter._term, RECSEARCH_TERM_MAX_LEN);
   _status = Parameter._status;
   _younger_than_days = Parameter._younger_than_days;
+  _hot_key = Parameter._hot_key;
 }
 
 recsearch::cSearchParameter::~cSearchParameter(void)
@@ -123,6 +124,8 @@ int recsearch::cSearchParameter::Compare(const cListObject &ListObject) const
      return _status - rhs._status;
   if (_younger_than_days != rhs._younger_than_days)
      return _younger_than_days - rhs._younger_than_days;
+  if (_hot_key != rhs._hot_key)
+     return _hot_key - rhs._hot_key;
   return 0;
 }
 
@@ -178,10 +181,13 @@ void recsearch::cSearchParameter::Clear(void)
   memset(_term, 0, RECSEARCH_TERM_MAX_LEN);
   _status = 0;
   _younger_than_days = 0;
+  _hot_key = 0;
 }
 
 bool recsearch::cSearchParameter::IsValid(void) const
 {
+  if ((_hot_key < 0) || (_hot_key > 9))
+     return false;
   if ((_status < 0) || (_younger_than_days < 0))
      return false;
   if (((_status > 0) && (_status < 3)) || (_younger_than_days > 0))
@@ -209,6 +215,10 @@ bool recsearch::cSearchParameter::Parse(const char *s)
   if ((value != NULL) && isnumber(value))
      _younger_than_days = atoi(value);
 
+  value = helper.Get("hotkey");
+  if ((value != NULL) && isnumber(value))
+     _hot_key = atoi(value);
+
   return IsValid();
 }
 
@@ -224,10 +234,14 @@ cString recsearch::cSearchParameter::ToString(void) const
   cString esc_term("");
   if (!isempty(_term))
      esc_term = strescape(_term, "\\,");
-  return cString::sprintf("term=%s,status=%d,youngerthandays=%d",
+  cString hot_key("");
+  if (_hot_key > 0)
+     hot_key = cString::sprintf(",hotkey=%d", _hot_key);
+  return cString::sprintf("term=%s,status=%d,youngerthandays=%d%s",
                           *esc_term,
                           _status,
-                          _younger_than_days);
+                          _younger_than_days,
+                          *hot_key);
 }
 
 cString recsearch::cSearchParameter::ToText(void) const
@@ -237,10 +251,13 @@ cString recsearch::cSearchParameter::ToText(void) const
   cString younger("");
   if (_younger_than_days > 0) // TRANSLATORS: note the leading comma and the %d for the number of days
      younger = cString::sprintf(tr(", younger than %d days"), _younger_than_days);
-  return cString::sprintf("%s=%s, %s=%s%s",
+  cString hotkey("");
+  if (_hot_key > 0) // TRANSLATORS: note the leading comma and the %d for the number of the hot key
+     hotkey = cString::sprintf(tr(", hot key %d"), _hot_key);
+  return cString::sprintf("%s=%s, %s=%s%s%s",
                        tr("search term"), _term,
                        tr("status"), _status_text[_status],
-                       *younger);
+                       *younger, *hotkey);
 }
 
 
@@ -253,6 +270,17 @@ recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParamet
       if (p->Compare(Parameter) == 0)
          return p;
       }
+  return NULL;
+}
+
+recsearch::cSearchParameter *recsearch::cSearches::GetHotKey(int HotKey) const
+{
+  if (HotKey > 0) {
+     for (cSearchParameter *p = First(); p; p = Next(p)) {
+         if (p->HotKey() == HotKey)
+            return p;
+         }
+     }
   return NULL;
 }
 
