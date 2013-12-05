@@ -16,8 +16,9 @@ namespace recsearch
     static const char *_status_text[3];
 
     mutable char _term[RECSEARCH_TERM_MAX_LEN];
-    int _status; // 0 = all, 1 = only new, 2 = only edited
+    int _status;            // 0 = all, 1 = only new, 2 = only edited
     int _younger_than_days; // only used if > 0
+    int _hot_key;           // 1 to 9, 0 = no key
 
   public:
     cSearchParameter(void);
@@ -36,6 +37,7 @@ namespace recsearch
 
     const char *Term(void) const { return _term; };
     int Status(void) const { return _status; };
+    int HotKey(void) const { return _hot_key; };
   };
 
   class cSearches : public cConfig<cSearchParameter>
@@ -49,6 +51,7 @@ namespace recsearch
 
     void SetFilename(const cString &Filename) { _filename = Filename; };
     cSearchParameter *Contains(const cSearchParameter &Parameter) const;
+    cSearchParameter *GetHotKey(int HotKey) const;
     bool LoadSearches(void);
   };
 }
