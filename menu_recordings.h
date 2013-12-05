@@ -1,7 +1,7 @@
 #ifndef recsearch_menu_recordings_h
 #define recsearch_menu_recordings_h
 
-// a copy of vdr's cMenuRecordings
+// a copy of vdr's cMenuRecordings (v2.1.2)
 // until it will get it's own Filter method
 
 #include <vdr/osdbase.h>
@@ -17,6 +17,8 @@ private:
   int recordingsState;
   int helpKeys;
   cRecordingFilter *filter;
+  static cString path;
+  static cString fileName;
   void SetHelpKeys(void);
   void Set(bool Refresh = false);
   bool Open(bool OpenSubMenus = false);
@@ -32,6 +34,8 @@ public:
   cMenuRecordings(const char *Base = NULL, int Level = 0, bool OpenSubMenus = false, cRecordingFilter *Filter = NULL);
   virtual ~cMenuRecordings();
   virtual eOSState ProcessKey(eKeys Key);
+  static void SetPath(const char *Path);
+  static void SetRecording(const char *FileName);
   };
 }
 
