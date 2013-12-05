@@ -248,16 +248,21 @@ cString recsearch::cSearchParameter::ToText(void) const
 {
   if (!IsValid())
      return tr("invalid");
+
+  cString term_status("");
+  if (_term[0])
+     term_status = cString::sprintf("%s, ", _term);
+  term_status = cString::sprintf("%s%s=%s", *term_status, tr("status"), _status_text[_status]);
+
   cString younger("");
   if (_younger_than_days > 0) // TRANSLATORS: note the leading comma and the %d for the number of days
      younger = cString::sprintf(tr(", younger than %d days"), _younger_than_days);
+
   cString hotkey("");
   if (_hot_key > 0) // TRANSLATORS: note the leading comma and the %d for the number of the hot key
      hotkey = cString::sprintf(tr(", hot key %d"), _hot_key);
-  return cString::sprintf("%s=%s, %s=%s%s%s",
-                       tr("search term"), _term,
-                       tr("status"), _status_text[_status],
-                       *younger, *hotkey);
+
+  return cString::sprintf("%s%s%s", *term_status, *younger, *hotkey);
 }
 
 

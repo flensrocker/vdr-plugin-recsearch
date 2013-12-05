@@ -5,17 +5,11 @@
 // until it will get it's own Filter method
 
 #include <vdr/osdbase.h>
+#include "recording_filter.h"
 
 
 namespace recsearch
 {
-class cRecordingFilter {
-public:
-  cRecordingFilter(void) {};
-  virtual ~cRecordingFilter(void) {};
-  virtual bool Filter(const cRecording *Recording) = 0;
-  };
-
 class cMenuRecordings : public cOsdMenu {
 private:
   char *base;
