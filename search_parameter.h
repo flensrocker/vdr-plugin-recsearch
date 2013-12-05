@@ -32,8 +32,8 @@ namespace recsearch
     bool IsValid(void) const;
     bool Parse(const char *s);
     bool Save(FILE *f);
-    cString ToString(void) const;
-    cString ToText(void) const;
+    cString ToString(void) const; // counterpart to Parse
+    cString ToText(void) const;   // userfriendly, localized on-screen representation
 
     const char *Term(void) const { return _term; };
     int Status(void) const { return _status; };
