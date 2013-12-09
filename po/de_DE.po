@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-recsearch 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2013-12-05 19:04+0100\n"
+"POT-Creation-Date: 2013-12-09 07:27+0100\n"
 "PO-Revision-Date: 2013-11-18 19:15+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: German <dvb@flensrocker.de>\n"
@@ -21,6 +21,12 @@ msgstr "durchsuche deine Aufnahmen"
 
 msgid "search recordings"
 msgstr "durchsuche Aufnahmen"
+
+msgid "select category"
+msgstr "Wähle Kategorie"
+
+msgid "<no category>"
+msgstr "<keine Kategorie>"
 
 msgid "load search template"
 msgstr "Suchvorlage laden"
@@ -43,6 +49,9 @@ msgstr "Schnelltaste"
 msgid "no hot key"
 msgstr "keine Schnelltaste"
 
+msgid "category"
+msgstr "Kategorie"
+
 msgid "Button$Save"
 msgstr "Speichern"
 
@@ -54,6 +63,9 @@ msgstr "Löschen"
 
 msgid "Button$Load"
 msgstr "Laden"
+
+msgid "Button$Select"
+msgstr "Wählen"
 
 msgid "search template has been saved"
 msgstr "Suchvorlage wurde gespeichert"
