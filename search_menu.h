@@ -15,6 +15,7 @@ namespace recsearch
   private:
     cSearchParameter _data;
     bool  _needs_refresh;
+    cOsdItem *_category;
 
   public:
     cSearchMenu(void);

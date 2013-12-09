@@ -104,7 +104,8 @@ recsearch::cSearchParameter::cSearchParameter(void)
 
 recsearch::cSearchParameter::cSearchParameter(const cSearchParameter &Parameter)
 {
-  memcpy(_term, Parameter._term, RECSEARCH_TERM_MAX_LEN);
+  memcpy(_category, Parameter._category, RECSEARCH_MAX_LEN);
+  memcpy(_term, Parameter._term, RECSEARCH_MAX_LEN);
   _status = Parameter._status;
   _younger_than_days = Parameter._younger_than_days;
   _hot_key = Parameter._hot_key;
@@ -117,7 +118,10 @@ recsearch::cSearchParameter::~cSearchParameter(void)
 int recsearch::cSearchParameter::Compare(const cListObject &ListObject) const
 {
   const cSearchParameter& rhs = (const cSearchParameter&)ListObject;
-  int cmp = strcasecmp(_term, rhs._term);
+  int cmp = strcasecmp(_category, rhs._category);
+  if (cmp != 0)
+     return cmp;
+  cmp = strcasecmp(_term, rhs._term);
   if (cmp != 0)
      return cmp;
   if (_status != rhs._status)
@@ -178,7 +182,8 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording)
 
 void recsearch::cSearchParameter::Clear(void)
 {
-  memset(_term, 0, RECSEARCH_TERM_MAX_LEN);
+  memset(_category, 0, RECSEARCH_MAX_LEN);
+  memset(_term, 0, RECSEARCH_MAX_LEN);
   _status = 0;
   _younger_than_days = 0;
   _hot_key = 0;
@@ -203,9 +208,13 @@ bool recsearch::cSearchParameter::Parse(const char *s)
 
   Clear();
 
+  value = helper.Get("category");
+  if (value != NULL)
+     strncpy(_category, value, RECSEARCH_MAX_LEN - 1);
+
   value = helper.Get("term");
   if (value != NULL)
-     strncpy(_term, value, RECSEARCH_TERM_MAX_LEN - 1);
+     strncpy(_term, value, RECSEARCH_MAX_LEN - 1);
 
   value = helper.Get("status");
   if ((value != NULL) && isnumber(value))
@@ -231,13 +240,20 @@ bool recsearch::cSearchParameter::Save(FILE *f)
 
 cString recsearch::cSearchParameter::ToString(void) const
 {
+  cString esc_category("");
+  if (!isempty(_category))
+     esc_category = strescape(_category, "\\,");
+
   cString esc_term("");
   if (!isempty(_term))
      esc_term = strescape(_term, "\\,");
+
   cString hot_key("");
   if (_hot_key > 0)
      hot_key = cString::sprintf(",hotkey=%d", _hot_key);
-  return cString::sprintf("term=%s,status=%d,youngerthandays=%d%s",
+
+  return cString::sprintf("category=%s,term=%s,status=%d,youngerthandays=%d%s",
+                          *esc_category,
                           *esc_term,
                           _status,
                           _younger_than_days,
@@ -265,6 +281,13 @@ cString recsearch::cSearchParameter::ToText(void) const
   return cString::sprintf("%s%s%s", *term_status, *younger, *hotkey);
 }
 
+void recsearch::cSearchParameter::SetCategory(const char *Category)
+{
+  memset(_category, 0, RECSEARCH_MAX_LEN);
+  if (Category != NULL)
+     strncpy(_category, Category, RECSEARCH_MAX_LEN - 1);
+}
+
 
 recsearch::cSearches recsearch::cSearches::Last;
 recsearch::cSearches recsearch::cSearches::Searches;
@@ -287,6 +310,17 @@ recsearch::cSearchParameter *recsearch::cSearches::GetHotKey(int HotKey) const
          }
      }
   return NULL;
+}
+
+void recsearch::cSearches::GetCategories(cStringList &Categories) const
+{
+  Categories.Clear();
+  for (cSearchParameter *p = First(); p; p = Next(p)) {
+      const char *c = p->Category();
+      if (!isempty(c) && (Categories.Find(c) < 0))
+         Categories.Append(strdup(c));
+      }
+  Categories.Sort();
 }
 
 bool recsearch::cSearches::LoadSearches(void)
