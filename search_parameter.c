@@ -104,15 +104,44 @@ recsearch::cSearchParameter::cSearchParameter(void)
 
 recsearch::cSearchParameter::cSearchParameter(const cSearchParameter &Parameter)
 {
+  operator=(Parameter);
+}
+
+recsearch::cSearchParameter::~cSearchParameter(void)
+{
+}
+
+recsearch::cSearchParameter &recsearch::cSearchParameter::operator=(const recsearch::cSearchParameter &Parameter)
+{
+  if (this == &Parameter)
+     return *this;
   memcpy(_category, Parameter._category, RECSEARCH_MAX_LEN);
   memcpy(_term, Parameter._term, RECSEARCH_MAX_LEN);
   _status = Parameter._status;
   _younger_than_days = Parameter._younger_than_days;
   _hot_key = Parameter._hot_key;
+  SplitTerms();
+  return *this;
 }
 
-recsearch::cSearchParameter::~cSearchParameter(void)
+void recsearch::cSearchParameter::SplitTerms(void)
 {
+  _splitted_terms.Clear();
+  char *a = _term;
+  char buffer[RECSEARCH_MAX_LEN];
+  do {
+    char *b = strchrnul(a, '|');
+    if (b > a) {
+       strncpy(buffer, a, b - a);
+       buffer[b - a] = '\0';
+       compactspace(buffer);
+       if (!isempty(buffer))
+          _splitted_terms.Append(strdup(buffer));
+       }
+    if (*b == '\0')
+       break;
+    a = b + 1;
+    } while (true);
 }
 
 int recsearch::cSearchParameter::Compare(const cListObject &ListObject) const
@@ -155,7 +184,7 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording)
         return false;
      }
 
-  if (isempty(_term)) {
+  if (_splitted_terms.Size() == 0) {
      if ((_status > 0) || (_younger_than_days > 0))
         return true;
      return false;
@@ -165,19 +194,30 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording)
   if (info == NULL)
      return false;
 
-  const char *text = info->Title();
-  if ((text != NULL) && (strcasestr(text, _term) != NULL))
-     return true;
+  int found = 0;
+  for (int i = 0; i < _splitted_terms.Size(); i++) {
+      const char *text = info->Title();
+      if ((text != NULL) && (strcasestr(text, _splitted_terms[i]) != NULL)) {
+         found++;
+         continue;
+         }
 
-  text = info->ShortText();
-  if ((text != NULL) && (strcasestr(text, _term) != NULL))
-     return true;
+      text = info->ShortText();
+      if ((text != NULL) && (strcasestr(text, _splitted_terms[i]) != NULL)) {
+         found++;
+         continue;
+         }
 
-  text = info->Description();
-  if ((text != NULL) && (strcasestr(text, _term) != NULL))
-     return true;
+      text = info->Description();
+      if ((text != NULL) && (strcasestr(text, _splitted_terms[i]) != NULL)) {
+         found++;
+         continue;
+         }
 
-  return false;
+      return false;
+      }
+
+  return (found == _splitted_terms.Size());
 }
 
 void recsearch::cSearchParameter::Clear(void)
