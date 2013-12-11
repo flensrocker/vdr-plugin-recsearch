@@ -13,5 +13,69 @@ the Free Software Foundation; either version 2 of the License, or
 See the file COPYING for more information.
 
 Description:
-Search your recordings and find the one you are looking for... :)
+Search through your recordings and find the one you are looking for... :)
 
+Files in recsearch's config directory
+-------------------------------------
+
+searches.conf:
+ Contains all search templates you saved with the red button.
+
+last.conf:
+ Contains your last executed search, regardless if it's in your searches.conf
+ or not.
+
+Input fields
+------------
+
+search term:
+ Enter one or more search terms splitted with '|' (pipe).
+ Title, short text and description of the recordings will be searched,
+ case will be ignored.
+
+status:
+ Restrict the results to only new or edited recordings.
+
+younger than days:
+ Show only recordings that are recorded in the last given days.
+
+hot key:
+ Bind the search template to a hot key between 1 and 9. You can load and
+ execute this search just with pressing the hot key in recsearch's menu.
+ And it's useful in your keymacros.conf, e.g. "User0 @recsearch 1"
+ You must keep track of your used hot keys on your own. If you assign the
+ same hot key to multiple templates the "first" one will be loaded (whatever
+ the "first" one is...).
+
+category:
+ Put this search template into a category to organize your saved templates
+ (see red and blue button).
+
+Red button:
+ Store the shown search template to your searches.conf.
+
+Green button/OK:
+ Start the search and display the results.
+
+Yellow button:
+ Delete the shown search template. If it's in your searches.conf, it will be
+ deleted from that file but the fields are not cleared (you can add it again
+ with the red button). If it's not part of your searches.conf all fields are
+ cleared (if you press yellow twice you really get rid off the template).
+
+Blue button:
+ Load a search template from your searches.conf.
+
+Syntax of searches.conf
+-----------------------
+
+Each line contains a search template.
+Comments or empty lines are not allowed.
+Each search template is a list of key-value pairs separated with a comma.
+A key is separated with an '=' from its value.
+A key must not contain an '='.
+Values can't contain line breaks.
+Commas and backslashes in a value must be escaped with a backslash.
+
+Valid keys so far (look at cSearchParameter::ToString):
+category, term, status, youngerthandays, hotkey
