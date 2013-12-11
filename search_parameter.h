@@ -21,10 +21,16 @@ namespace recsearch
     int _younger_than_days; // only used if > 0
     int _hot_key;           // 1 to 9, 0 = no key
 
+    cStringList _splitted_terms;
+
+    void SplitTerms(void);
+
   public:
     cSearchParameter(void);
     cSearchParameter(const cSearchParameter &Parameter);
     virtual ~cSearchParameter(void);
+
+    cSearchParameter &operator=(const cSearchParameter &Parameter);
 
     virtual int Compare(const cListObject &ListObject) const;
     virtual bool Filter(const cRecording *Recording);
