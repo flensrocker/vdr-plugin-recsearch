@@ -1,9 +1,7 @@
 #include "search_menu.h"
 
-#include "menu_recordings.h"
-
 #include <vdr/interface.h>
-#include <vdr/menuitems.h>
+#include <vdr/menu.h>
 
 
 // --- cSearchMenuCategory ---------------------------------------------------
@@ -188,6 +186,16 @@ namespace recsearch
 
 // --- cSearchMenu -----------------------------------------------------------
 
+recsearch::cSearchParameter *recsearch::cSearchMenu::_last = NULL;
+
+recsearch::cSearchParameter *recsearch::cSearchMenu::GetFilter(const cSearchParameter &Parameter)
+{
+  if (_last)
+     delete _last;
+  _last = new cSearchParameter(Parameter);
+  return _last;
+}
+
 recsearch::cSearchMenu::cSearchMenu(void)
 :cOsdMenu(tr("search recordings"), 12)
 ,_needs_refresh(false)
@@ -249,7 +257,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
          cSearches::Searches.LoadSearches();
          cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
          if (p != NULL)
-            return AddSubMenu(new cMenuRecordings(NULL, -1, false, new cSearchParameter(*p)));
+            return AddSubMenu(new cMenuRecordings(NULL, -1, false, GetFilter(*p)));
          break;
         }
        case kRed:
@@ -269,7 +277,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
              cSearches::Last.cList<cSearchParameter>::Clear();
              cSearches::Last.Add(new cSearchParameter(_data));
              cSearches::Last.Save();
-             return AddSubMenu(new cMenuRecordings(NULL, -1, false, new cSearchParameter(_data)));
+             return AddSubMenu(new cMenuRecordings(NULL, -1, false, GetFilter(_data)));
              }
           Skins.Message(mtError, tr("enter something I can search for"));
           return osContinue;

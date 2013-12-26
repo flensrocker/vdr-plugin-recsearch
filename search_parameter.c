@@ -162,7 +162,7 @@ int recsearch::cSearchParameter::Compare(const cListObject &ListObject) const
   return 0;
 }
 
-bool recsearch::cSearchParameter::Filter(const cRecording *Recording)
+bool recsearch::cSearchParameter::Filter(const cRecording *Recording) const
 {
   if (Recording == NULL)
      return false;

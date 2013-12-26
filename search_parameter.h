@@ -1,7 +1,7 @@
 #ifndef recsearch_search_parameter_h
 #define recsearch_search_parameter_h
 
-#include "menu_recordings.h"
+#include <vdr/menu.h>
 
 
 namespace recsearch
@@ -33,7 +33,7 @@ namespace recsearch
     cSearchParameter &operator=(const cSearchParameter &Parameter);
 
     virtual int Compare(const cListObject &ListObject) const;
-    virtual bool Filter(const cRecording *Recording);
+    virtual bool Filter(const cRecording *Recording) const;
 
     void Clear(void);
     bool IsValid(void) const;
