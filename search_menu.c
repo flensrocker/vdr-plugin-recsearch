@@ -184,17 +184,31 @@ namespace recsearch
 }
 
 
-// --- cSearchMenu -----------------------------------------------------------
+// --- cSearchResult ---------------------------------------------------------
 
-recsearch::cSearchParameter *recsearch::cSearchMenu::_last = NULL;
-
-recsearch::cSearchParameter *recsearch::cSearchMenu::GetFilter(const cSearchParameter &Parameter)
+namespace recsearch
 {
-  if (_last)
-     delete _last;
-  _last = new cSearchParameter(Parameter);
-  return _last;
+  class cSearchResult : public cMenuRecordings
+  {
+  private:
+    const cRecordingFilter *_filter;
+
+  public:
+    cSearchResult(const cRecordingFilter *Filter)
+    :cMenuRecordings(NULL, -1, false, Filter)
+    ,_filter(Filter)
+    {
+    };
+
+    virtual ~cSearchResult(void)
+    {
+      delete _filter;
+    };
+  };
 }
+
+
+// --- cSearchMenu -----------------------------------------------------------
 
 recsearch::cSearchMenu::cSearchMenu(void)
 :cOsdMenu(tr("search recordings"), 12)
@@ -257,7 +271,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
          cSearches::Searches.LoadSearches();
          cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
          if (p != NULL)
-            return AddSubMenu(new cMenuRecordings(NULL, -1, false, GetFilter(*p)));
+            return AddSubMenu(new cSearchResult(new cSearchParameter(*p)));
          break;
         }
        case kRed:
@@ -277,7 +291,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
              cSearches::Last.cList<cSearchParameter>::Clear();
              cSearches::Last.Add(new cSearchParameter(_data));
              cSearches::Last.Save();
-             return AddSubMenu(new cMenuRecordings(NULL, -1, false, GetFilter(_data)));
+             return AddSubMenu(new cSearchResult(new cSearchParameter(_data)));
              }
           Skins.Message(mtError, tr("enter something I can search for"));
           return osContinue;

@@ -13,9 +13,6 @@ namespace recsearch
   class cSearchMenu : public cOsdMenu
   {
   private:
-    static cSearchParameter *_last;
-    static cSearchParameter *GetFilter(const cSearchParameter &Parameter);
-
     cSearchParameter _data;
     bool  _needs_refresh;
     cOsdItem *_category;
