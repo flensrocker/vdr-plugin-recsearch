@@ -3,6 +3,10 @@
 #include <vdr/interface.h>
 #include <vdr/menu.h>
 
+#if APIVERSNUM < 20103
+#include "menu_recordings.h"
+#endif
+
 
 // --- cSearchMenuCategory ---------------------------------------------------
 
@@ -190,14 +194,19 @@ namespace recsearch
 
 namespace recsearch
 {
-  class cSearchResult : public cMenuRecordings
+#if APIVERSNUM < 20103
+#define CMENURECORDINGS recsearch::cMenuRecordings
+#else
+#define CMENURECORDINGS cMenuRecordings
+#endif
+  class cSearchResult : public CMENURECORDINGS
   {
   private:
     const cRecordingFilter *_filter;
 
   public:
     cSearchResult(const cRecordingFilter *Filter)
-    :cMenuRecordings(NULL, -1, false, Filter)
+    :CMENURECORDINGS(NULL, -1, false, Filter)
     ,_filter(Filter)
     {
     };
@@ -207,6 +216,7 @@ namespace recsearch
       delete _filter;
     };
   };
+#undef CMENURECORDINGS
 }
 
 

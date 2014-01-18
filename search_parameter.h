@@ -3,6 +3,10 @@
 
 #include <vdr/menu.h>
 
+#if APIVERSNUM < 20103
+#include "recording_filter.h"
+#endif
+
 
 namespace recsearch
 {
