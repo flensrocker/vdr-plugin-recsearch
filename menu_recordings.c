@@ -129,7 +129,7 @@ void recsearch::cMenuRecordingItem::SetMenuItem(cSkinDisplayMenu *DisplayMenu, i
 
 // --- cMenuRecordings -------------------------------------------------------
 
-recsearch::cMenuRecordings::cMenuRecordings(const char *Base, int Level, bool OpenSubMenus, cRecordingFilter *Filter)
+recsearch::cMenuRecordings::cMenuRecordings(const char *Base, int Level, bool OpenSubMenus, const cRecordingFilter *Filter)
 :cOsdMenu(Base ? Base : trVDR("Recordings"), 9, 6, 6)
 ,filter(Filter)
 {
@@ -152,8 +152,6 @@ recsearch::cMenuRecordings::~cMenuRecordings()
 {
   helpKeys = -1;
   free(base);
-  if (filter)
-     delete filter;
 }
 
 void recsearch::cMenuRecordings::SetHelpKeys(void)
@@ -247,7 +245,7 @@ bool recsearch::cMenuRecordings::Open(bool OpenSubMenus)
         buffer = cString::sprintf("%s~%s", base, t);
         t = buffer;
         }
-     AddSubMenu(new cMenuRecordings(t, level + 1, OpenSubMenus));
+     AddSubMenu(new cMenuRecordings(t, level + 1, OpenSubMenus, filter));
      return true;
      }
   return false;

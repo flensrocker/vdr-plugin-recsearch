@@ -1,9 +1,11 @@
 #include "search_menu.h"
 
-#include "menu_recordings.h"
-
 #include <vdr/interface.h>
-#include <vdr/menuitems.h>
+#include <vdr/menu.h>
+
+#if APIVERSNUM < 20103
+#include "menu_recordings.h"
+#endif
 
 
 // --- cSearchMenuCategory ---------------------------------------------------
@@ -92,7 +94,8 @@ namespace recsearch
               _parameter.SetCategory(category);
               return osBack;
             }
-           default: break;
+           default:
+              return osContinue;
            }
          }
 
@@ -176,13 +179,44 @@ namespace recsearch
                  }
               break;
             }
-           default: break;
+           default:
+              return osContinue;
            }
          }
 
       return state;
     };
   };
+}
+
+
+// --- cSearchResult ---------------------------------------------------------
+
+namespace recsearch
+{
+#if APIVERSNUM < 20103
+#define CMENURECORDINGS recsearch::cMenuRecordings
+#else
+#define CMENURECORDINGS cMenuRecordings
+#endif
+  class cSearchResult : public CMENURECORDINGS
+  {
+  private:
+    const cRecordingFilter *_filter;
+
+  public:
+    cSearchResult(const cRecordingFilter *Filter)
+    :CMENURECORDINGS(NULL, -1, false, Filter)
+    ,_filter(Filter)
+    {
+    };
+
+    virtual ~cSearchResult(void)
+    {
+      delete _filter;
+    };
+  };
+#undef CMENURECORDINGS
 }
 
 
@@ -249,7 +283,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
          cSearches::Searches.LoadSearches();
          cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
          if (p != NULL)
-            return AddSubMenu(new cMenuRecordings(NULL, -1, false, new cSearchParameter(*p)));
+            return AddSubMenu(new cSearchResult(new cSearchParameter(*p)));
          break;
         }
        case kRed:
@@ -269,7 +303,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
              cSearches::Last.cList<cSearchParameter>::Clear();
              cSearches::Last.Add(new cSearchParameter(_data));
              cSearches::Last.Save();
-             return AddSubMenu(new cMenuRecordings(NULL, -1, false, new cSearchParameter(_data)));
+             return AddSubMenu(new cSearchResult(new cSearchParameter(_data)));
              }
           Skins.Message(mtError, tr("enter something I can search for"));
           return osContinue;
