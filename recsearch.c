@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.1.1";
+static const char *VERSION        = "0.1.2";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 

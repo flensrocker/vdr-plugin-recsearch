@@ -92,7 +92,8 @@ namespace recsearch
               _parameter.SetCategory(category);
               return osBack;
             }
-           default: break;
+           default:
+              return osContinue;
            }
          }
 
@@ -176,7 +177,8 @@ namespace recsearch
                  }
               break;
             }
-           default: break;
+           default:
+              return osContinue;
            }
          }
 
