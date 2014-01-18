@@ -1,0 +1,59 @@
+--- menu.h	2013/10/30 14:32:13	3.4
++++ menu.h	2013/12/25 12:06:03
+@@ -191,6 +191,13 @@
+ cOsdObject *CamControl(void);
+ bool CamMenuActive(void);
+ 
++class cRecordingFilter {
++public:
++  virtual ~cRecordingFilter(void) {};
++  virtual bool Filter(const cRecording *Recording) const = 0;
++      ///< Returns true if the given Recording shall be displayed in the Recordings menu.
++  };
++
+ class cMenuRecordingItem;
+ 
+ class cMenuRecordings : public cOsdMenu {
+@@ -199,6 +206,7 @@
+   int level;
+   int recordingsState;
+   int helpKeys;
++  const cRecordingFilter *filter;
+   static cString path;
+   static cString fileName;
+   void SetHelpKeys(void);
+@@ -213,7 +221,7 @@
+ protected:
+   cString DirectoryName(void);
+ public:
+-  cMenuRecordings(const char *Base = NULL, int Level = 0, bool OpenSubMenus = false);
++  cMenuRecordings(const char *Base = NULL, int Level = 0, bool OpenSubMenus = false, const cRecordingFilter *Filter = NULL);
+   ~cMenuRecordings();
+   virtual eOSState ProcessKey(eKeys Key);
+   static void SetPath(const char *Path);
+--- menu.c	2013/11/03 14:08:35	3.13
++++ menu.c	2013/12/25 12:03:32
+@@ -2571,12 +2571,13 @@
+ cString cMenuRecordings::path;
+ cString cMenuRecordings::fileName;
+ 
+-cMenuRecordings::cMenuRecordings(const char *Base, int Level, bool OpenSubMenus)
++cMenuRecordings::cMenuRecordings(const char *Base, int Level, bool OpenSubMenus, const cRecordingFilter *Filter)
+ :cOsdMenu(Base ? Base : tr("Recordings"), 9, 6, 6)
+ {
+   SetMenuCategory(mcRecording);
+   base = Base ? strdup(Base) : NULL;
+   level = Setup.RecordingDirs ? Level : -1;
++  filter = Filter;
+   Recordings.StateChanged(recordingsState); // just to get the current state
+   helpKeys = -1;
+   Display(); // this keeps the higher level menus from showing up briefly when pressing 'Back' during replay
+@@ -2633,7 +2634,7 @@
+   GetRecordingsSortMode(DirectoryName());
+   Recordings.Sort();
+   for (cRecording *recording = Recordings.First(); recording; recording = Recordings.Next(recording)) {
+-      if (!base || (strstr(recording->Name(), base) == recording->Name() && recording->Name()[strlen(base)] == FOLDERDELIMCHAR)) {
++      if ((!filter || filter->Filter(recording)) && (!base || (strstr(recording->Name(), base) == recording->Name() && recording->Name()[strlen(base)] == FOLDERDELIMCHAR))) {
+          cMenuRecordingItem *Item = new cMenuRecordingItem(recording, level);
+          cMenuRecordingItem *LastDir = NULL;
+          if (Item->IsDirectory()) {

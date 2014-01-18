@@ -6,11 +6,12 @@ class cRecording;
 
 namespace recsearch
 {
+// backport from vdr 2.1.3
 class cRecordingFilter {
 public:
-  cRecordingFilter(void) {};
   virtual ~cRecordingFilter(void) {};
-  virtual bool Filter(const cRecording *Recording) = 0;
+  virtual bool Filter(const cRecording *Recording) const = 0;
+      ///< Returns true if the given Recording shall be displayed in the Recordings menu.
   };
 }
 

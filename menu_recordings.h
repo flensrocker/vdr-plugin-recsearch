@@ -16,7 +16,7 @@ private:
   int level;
   int recordingsState;
   int helpKeys;
-  cRecordingFilter *filter;
+  const cRecordingFilter *filter;
   void SetHelpKeys(void);
   void Set(bool Refresh = false);
   bool Open(bool OpenSubMenus = false);
@@ -29,7 +29,7 @@ private:
 protected:
   cString DirectoryName(void);
 public:
-  cMenuRecordings(const char *Base = NULL, int Level = 0, bool OpenSubMenus = false, cRecordingFilter *Filter = NULL);
+  cMenuRecordings(const char *Base = NULL, int Level = 0, bool OpenSubMenus = false, const cRecordingFilter *Filter = NULL);
   virtual ~cMenuRecordings();
   virtual eOSState ProcessKey(eKeys Key);
   };
