@@ -1,8 +1,10 @@
 #ifndef recsearch_menu_recordings_h
 #define recsearch_menu_recordings_h
 
+#include <vdr/config.h>
+#if APIVERSNUM < 20103
 // a copy of vdr's cMenuRecordings
-// until it will get it's own Filter method
+// for older versions
 
 #include <vdr/osdbase.h>
 #include "recording_filter.h"
@@ -35,4 +37,5 @@ public:
   };
 }
 
+#endif
 #endif

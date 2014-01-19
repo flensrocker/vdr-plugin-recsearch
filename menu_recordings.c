@@ -1,5 +1,7 @@
 #include "menu_recordings.h"
 
+#if APIVERSNUM < 20103
+
 #include <vdr/cutter.h>
 #include <vdr/interface.h>
 #include <vdr/menu.h>
@@ -404,3 +406,6 @@ eOSState recsearch::cMenuRecordings::ProcessKey(eKeys Key)
      }
   return state;
 }
+
+#endif
+
