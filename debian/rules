@@ -2,7 +2,11 @@
 
 #DH_VERBOSE=1
 
-.PHONY: override_dh_strip override_dh_auto_install
+.PHONY: override_dh_gencontrol override_dh_strip override_dh_auto_install
+
+override_dh_gencontrol:
+	sh /usr/share/vdr-dev/dependencies.sh
+	dh_gencontrol
 
 override_dh_strip:
 	dh_strip --dbg-package=vdr-plugin-recsearch-dbg

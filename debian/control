@@ -8,7 +8,7 @@ Homepage: https://github.com/flensrocker/vdr-plugin-recsearch
 
 Package: vdr-plugin-recsearch
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${vdr:Depends}
 Description: A VDR plugin for searching through your recordings
  This VDR-plugin adds a main menu item for a simple search
  interface for your recordings.
