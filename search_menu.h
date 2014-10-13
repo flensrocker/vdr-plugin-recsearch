@@ -24,6 +24,19 @@ namespace recsearch
     virtual void Display(void);
     virtual eOSState ProcessKey(eKeys Key);
   };
+
+  class cMainMenu : public cOsdMenu
+  {
+  private:
+   char  *_base_cat;
+   cList<cNestedItem>  *_cats;
+
+  public:
+    cMainMenu(const char *BaseCat = NULL, cList<cNestedItem> *Cats = NULL);
+    virtual ~cMainMenu(void);
+
+    virtual eOSState ProcessKey(eKeys Key);
+  };
 }
 
 #endif

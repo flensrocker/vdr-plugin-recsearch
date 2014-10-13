@@ -115,6 +115,7 @@ recsearch::cSearchParameter &recsearch::cSearchParameter::operator=(const recsea
 {
   if (this == &Parameter)
      return *this;
+  memcpy(_name, Parameter._name, RECSEARCH_MAX_LEN);
   memcpy(_category, Parameter._category, RECSEARCH_MAX_LEN);
   memcpy(_term, Parameter._term, RECSEARCH_MAX_LEN);
   _status = Parameter._status;
@@ -147,7 +148,10 @@ void recsearch::cSearchParameter::SplitTerms(void)
 int recsearch::cSearchParameter::Compare(const cListObject &ListObject) const
 {
   const cSearchParameter& rhs = (const cSearchParameter&)ListObject;
-  int cmp = strcasecmp(_category, rhs._category);
+  int cmp = strcasecmp(_name, rhs._name);
+  if (cmp != 0)
+     return cmp;
+  cmp = strcasecmp(_category, rhs._category);
   if (cmp != 0)
      return cmp;
   cmp = strcasecmp(_term, rhs._term);
@@ -222,6 +226,7 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording) const
 
 void recsearch::cSearchParameter::Clear(void)
 {
+  memset(_name, 0, RECSEARCH_MAX_LEN);
   memset(_category, 0, RECSEARCH_MAX_LEN);
   memset(_term, 0, RECSEARCH_MAX_LEN);
   _status = 0;
@@ -247,6 +252,10 @@ bool recsearch::cSearchParameter::Parse(const char *s)
   cParameterHelper helper(s);
 
   Clear();
+
+  value = helper.Get("name");
+  if (value != NULL)
+     strncpy(_name, value, RECSEARCH_MAX_LEN - 1);
 
   value = helper.Get("category");
   if (value != NULL)
@@ -280,6 +289,10 @@ bool recsearch::cSearchParameter::Save(FILE *f)
 
 cString recsearch::cSearchParameter::ToString(void) const
 {
+  cString esc_name("");
+  if (!isempty(_name))
+     esc_name = strescape(_name, "\\,");
+
   cString esc_category("");
   if (!isempty(_category))
      esc_category = strescape(_category, "\\,");
@@ -292,7 +305,8 @@ cString recsearch::cSearchParameter::ToString(void) const
   if (_hot_key > 0)
      hot_key = cString::sprintf(",hotkey=%d", _hot_key);
 
-  return cString::sprintf("category=%s,term=%s,status=%d,youngerthandays=%d%s",
+  return cString::sprintf("name=%s,category=%s,term=%s,status=%d,youngerthandays=%d%s",
+                          *esc_name,
                           *esc_category,
                           *esc_term,
                           _status,
@@ -304,6 +318,9 @@ cString recsearch::cSearchParameter::ToText(void) const
 {
   if (!IsValid())
      return tr("invalid");
+
+  if (!isempty(_name))
+     return cString(_name);
 
   cString term_status("");
   if (_term[0])
@@ -331,6 +348,7 @@ void recsearch::cSearchParameter::SetCategory(const char *Category)
 
 recsearch::cSearches recsearch::cSearches::Last;
 recsearch::cSearches recsearch::cSearches::Searches;
+const char *recsearch::cSearches::CatDelim = "~";
 
 recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParameter &Parameter) const
 {
@@ -361,6 +379,45 @@ void recsearch::cSearches::GetCategories(cStringList &Categories) const
          Categories.Append(strdup(c));
       }
   Categories.Sort();
+}
+
+static cNestedItem *find_nested_item(cList<cNestedItem> *List, const char *Text)
+{
+  for (cNestedItem *i = List->First(); i; i = List->Next(i)) {
+      if (((Text == NULL) && (i->Text() == NULL))
+       || ((Text != NULL) && (i->Text() != NULL) && (strcmp(Text, i->Text()) == 0)))
+         return i;
+      }
+  return NULL;
+}
+
+void recsearch::cSearches::GetCatMenus(cList<cNestedItem> *CatMenus) const
+{
+  CatMenus->Clear();
+  for (cSearchParameter *p = First(); p; p = Next(p)) {
+      char *c = strdup(p->Category());
+      if (isempty(c))
+         CatMenus->Add(new cNestedItem(*p->ToString()));
+      else {
+         cList<cNestedItem> *list = CatMenus;
+         cNestedItem *item = NULL;
+         char *strtok_next;
+         for (char *t = strtok_r(c, CatDelim, &strtok_next); t; t = strtok_r(NULL, CatDelim, &strtok_next)) {
+             item = find_nested_item(list, t);
+             if (item == NULL) {
+                item = new cNestedItem(t, true);
+                cNestedItem *s = list->First();
+                while (s && (s->SubItems() != NULL) && (strcasecmp(s->Text(), c) < 0))
+                      s = list->Next(s);
+                list->Ins(item, s);
+                }
+             list = item->SubItems();
+             }
+         if (item != NULL)
+            item->AddSubItem(new cNestedItem(*p->ToString()));
+         }
+      free(c);
+      }
 }
 
 bool recsearch::cSearches::LoadSearches(void)
