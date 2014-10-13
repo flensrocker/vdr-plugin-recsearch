@@ -116,6 +116,7 @@ namespace recsearch
     cSearchParameter &_parameter;
     cStringList       _categories;
     const char       *_category;
+    int               _current_category;
 
   public:
     cSearchMenuLoad(cSearches &Searches, cSearchParameter &Parameter)
@@ -123,6 +124,7 @@ namespace recsearch
     ,_searches(Searches)
     ,_parameter(Parameter)
     ,_category(NULL)
+    ,_current_category(-1)
     {
       SetCategory(NULL);
     };
@@ -157,6 +159,12 @@ namespace recsearch
     {
       if ((Key == kBack) && (_category != NULL)) {
          SetCategory(NULL);
+         if ((_current_category > 0) && (_current_category < Count())) {
+            DisplayCurrent(false);
+            SetCurrent(Get(_current_category));
+            DisplayCurrent(true);
+            }
+         _current_category = -1;
          return osContinue;
          }
 
@@ -166,7 +174,8 @@ namespace recsearch
          switch (Key) {
            case kOk:
             {
-              cOsdItem *i = Get(Current());
+              int cur = Current();
+              cOsdItem *i = Get(cur);
               cSearchMenuItem *item = dynamic_cast<cSearchMenuItem*>(i);
               if (item != NULL) {
                  _parameter = *(item->_parameter);
@@ -174,6 +183,7 @@ namespace recsearch
                  }
               cSearchMenuCategory *category = dynamic_cast<cSearchMenuCategory*>(i);
               if (category != NULL) {
+                 _current_category = cur;
                  SetCategory(category->_category);
                  return osContinue;
                  }
