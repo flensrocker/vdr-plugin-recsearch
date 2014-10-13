@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.2.2";
+static const char *VERSION        = "0.3.0";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 
@@ -110,7 +110,10 @@ time_t cPluginRecsearch::WakeupTime(void)
 cOsdObject *cPluginRecsearch::MainMenuAction(void)
 {
   // Perform the action when selected from the main VDR menu.
-  return new recsearch::cSearchMenu();
+  recsearch::cSearches::Searches.LoadSearches();
+  if (recsearch::cSearches::Searches.Count() == 0)
+     return new recsearch::cSearchMenu();
+  return new recsearch::cMainMenu();
 }
 
 cMenuSetupPage *cPluginRecsearch::SetupMenu(void)

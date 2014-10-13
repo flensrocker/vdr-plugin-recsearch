@@ -25,8 +25,34 @@ last.conf:
  Contains your last executed search, regardless if it's in your searches.conf
  or not.
 
-Input fields
-------------
+Navigation
+----------
+
+If there are no stored search templates the edit page is opened, see "Edit
+search template". Add as many templates to your searches.conf as you like.
+
+If there are already some templates available, these are shown ordered by
+their categories. The tilde "~" is used as a delimiter for submenus.
+
+OK:
+ Will open the category or execute the selected search.
+
+Red button:
+ If the focus is on a search template it can be edited.
+
+Green button:
+ A new search template can be added.
+
+Yellow button:
+ If the focus is on a search template it can be deleted.
+
+Edit search template
+--------------------
+
+name:
+ The name is just a name and will only be used for displaying the search
+ template in the OSD. If emtpy, a generic name containing the parameters
+ is shown. It is not used by the filter.
 
 search term:
  Enter one or more search terms splitted with '|' (pipe).
@@ -49,7 +75,8 @@ hot key:
 
 category:
  Put this search template into a category to organize your saved templates
- (see red and blue button).
+ (see red and blue button). The tilde "~" can be used to divide the categories
+ into "folders".
 
 Red button:
  Store the shown search template to your searches.conf.
@@ -65,6 +92,8 @@ Yellow button:
 
 Blue button:
  Load a search template from your searches.conf.
+ If the focus is on the category field you can select one from the available
+ categories.
 
 Syntax of searches.conf
 -----------------------
@@ -78,4 +107,4 @@ Values can't contain line breaks.
 Commas and backslashes in a value must be escaped with a backslash.
 
 Valid keys so far (look at cSearchParameter::ToString):
-category, term, status, youngerthandays, hotkey
+name, category, term, status, youngerthandays, hotkey

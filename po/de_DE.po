@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-recsearch 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2013-12-09 07:27+0100\n"
+"POT-Creation-Date: 2014-10-14 00:49+0200\n"
 "PO-Revision-Date: 2013-11-18 19:15+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: German <dvb@flensrocker.de>\n"
-"Language: \n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,6 +30,12 @@ msgstr "<keine Kategorie>"
 
 msgid "load search template"
 msgstr "Suchvorlage laden"
+
+msgid "edit search templates"
+msgstr "Suchvorlage bearbeiten"
+
+msgid "name"
+msgstr "Name"
 
 msgid "search term"
 msgstr "Suchbegriff"
@@ -81,6 +87,15 @@ msgstr "Suchvorlage wurde aus der Datei gelöscht"
 
 msgid "you have to save a search template first"
 msgstr "zuerst muss eine Suchvorlage gespeichert werden"
+
+msgid "Button$New"
+msgstr "Neu"
+
+msgid "Button$Edit"
+msgstr "Bearbeiten"
+
+msgid "delete selected search template?"
+msgstr "Ausgewählte Suchvorlage löschen?"
 
 msgid "all"
 msgstr "alle"
