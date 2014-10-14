@@ -48,6 +48,7 @@ namespace recsearch
     cString ToText(void) const;   // userfriendly, localized on-screen representation
 
     void SetCategory(const char *Category);
+    void SetName(const char *Name);
 
     const char *Name(void) const { return _name; };
     const char *Category(void) const { return _category; };

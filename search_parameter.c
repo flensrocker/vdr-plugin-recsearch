@@ -367,6 +367,13 @@ void recsearch::cSearchParameter::SetCategory(const char *Category)
      strncpy(_category, Category, RECSEARCH_MAX_LEN - 1);
 }
 
+void recsearch::cSearchParameter::SetName(const char *Name)
+{
+  memset(_name, 0, RECSEARCH_MAX_LEN);
+  if (Name != NULL)
+     strncpy(_name, Name, RECSEARCH_MAX_LEN - 1);
+}
+
 
 recsearch::cSearches recsearch::cSearches::Last;
 recsearch::cSearches recsearch::cSearches::Searches;
