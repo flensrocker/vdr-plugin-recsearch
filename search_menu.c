@@ -262,10 +262,14 @@ namespace recsearch
     const cRecordingFilter *_filter;
 
   public:
-    cSearchResult(const cRecordingFilter *Filter)
+    cSearchResult(const cSearchParameter *Filter)
     :CMENURECORDINGS(NULL, -1, false, Filter)
     ,_filter(Filter)
     {
+      cSearches::Last.LoadSearches(); // to set filename in cConfig
+      cSearches::Last.cList<cSearchParameter>::Clear();
+      cSearches::Last.Add(new cSearchParameter(*Filter));
+      cSearches::Last.Save();
     };
 
     virtual ~cSearchResult(void)
@@ -279,13 +283,17 @@ namespace recsearch
 
 // --- cSearchMenu -----------------------------------------------------------
 
-recsearch::cSearchMenu::cSearchMenu(void)
+recsearch::cSearchMenu::cSearchMenu(cSearchParameter *Draft)
 :cOsdMenu(tr("edit search templates"), 15)
 ,_needs_refresh(false)
 {
   SetMenuCategory(mcPlugin);
 
-  if (cSearches::Last.LoadSearches() && (cSearches::Last.Count() > 0))
+  if (Draft != NULL) {
+     _data = *Draft;
+     delete Draft;
+     }
+  else if (cSearches::Last.LoadSearches() && (cSearches::Last.Count() > 0))
      _data = *cSearches::Last.Get(0);
 
   Add(new cMenuEditStrItem(tr("name"), _data._name, RECSEARCH_MAX_LEN, NULL));
@@ -357,12 +365,8 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
        case kGreen:
        case kOk:
         {
-          if (_data.IsValid()) {
-             cSearches::Last.cList<cSearchParameter>::Clear();
-             cSearches::Last.Add(new cSearchParameter(_data));
-             cSearches::Last.Save();
+          if (_data.IsValid())
              return AddSubMenu(new cSearchResult(new cSearchParameter(_data)));
-             }
           Skins.Message(mtError, tr("enter something I can search for"));
           return osContinue;
         }
@@ -490,19 +494,16 @@ eOSState recsearch::cMainMenu::ProcessKey(eKeys Key)
         }
        case kRed:
         {
-         if (item != NULL) {
-            cSearches::Last.cList<cSearchParameter>::Clear();
-            cSearches::Last.Add(new cSearchParameter(*(item->_parameter)));
-            cSearches::Last.Save();
-            return AddSubMenu(new cSearchMenu());
-            }
+         if (item != NULL)
+            return AddSubMenu(new cSearchMenu(new cSearchParameter(*(item->_parameter))));
          return osContinue;;
         }
        case kGreen:
         {
-         cSearches::Last.cList<cSearchParameter>::Clear();
-         cSearches::Last.Save();
-         return AddSubMenu(new cSearchMenu());
+         cSearchParameter *p = new cSearchParameter();
+         if (_base_cat != NULL)
+            p->SetCategory(_base_cat);
+         return AddSubMenu(new cSearchMenu(p));
          break;
         }
        case kYellow:
@@ -525,12 +526,8 @@ eOSState recsearch::cMainMenu::ProcessKey(eKeys Key)
         }
        case kOk:
         {
-          if (item != NULL) {
-             cSearches::Last.cList<cSearchParameter>::Clear();
-             cSearches::Last.Add(new cSearchParameter(*(item->_parameter)));
-             cSearches::Last.Save();
+          if (item != NULL)
              return AddSubMenu(new cSearchResult(new cSearchParameter(*(item->_parameter))));
-             }
 
           if ((category != NULL) && (category->_sub_cats != NULL)) {
              cList<cNestedItem> *sub_cats = category->_sub_cats->SubItems();
