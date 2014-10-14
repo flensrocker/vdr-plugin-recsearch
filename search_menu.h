@@ -18,7 +18,7 @@ namespace recsearch
     cOsdItem *_category;
 
   public:
-    cSearchMenu(void);
+    cSearchMenu(cSearchParameter *Draft = NULL);
     virtual ~cSearchMenu(void);
 
     virtual void Display(void);
