@@ -199,23 +199,45 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording) const
      return false;
 
   int found = 0;
+  const char *text;
+  const char *term;
+  int look_into; // bit 1: title, bit 2: shorttext, bit 3: description
   for (int i = 0; i < _splitted_terms.Size(); i++) {
-      const char *text = info->Title();
-      if ((text != NULL) && (strcasestr(text, _splitted_terms[i]) != NULL)) {
-         found++;
-         continue;
+      term = _splitted_terms[i];
+      look_into = 7;
+      if ((strlen(term) > 2) && (term[1] == ':')) {
+         if ((term[0] == 't') || (term[0] == 'T'))
+            look_into = 1;
+         else if ((term[0] == 's') || (term[0] == 'S'))
+            look_into = 2;
+         else if ((term[0] == 'd') || (term[0] == 'D'))
+            look_into = 4;
+         if (look_into != 7)
+            term += 2;
          }
 
-      text = info->ShortText();
-      if ((text != NULL) && (strcasestr(text, _splitted_terms[i]) != NULL)) {
-         found++;
-         continue;
+      if ((look_into & 1) != 0) {
+         text = info->Title();
+         if ((text != NULL) && (strcasestr(text, term) != NULL)) {
+            found++;
+            continue;
+            }
          }
 
-      text = info->Description();
-      if ((text != NULL) && (strcasestr(text, _splitted_terms[i]) != NULL)) {
-         found++;
-         continue;
+      if ((look_into & 2) != 0) {
+         text = info->ShortText();
+         if ((text != NULL) && (strcasestr(text, term) != NULL)) {
+            found++;
+            continue;
+            }
+         }
+
+      if ((look_into & 4) != 0) {
+         text = info->Description();
+         if ((text != NULL) && (strcasestr(text, term) != NULL)) {
+            found++;
+            continue;
+            }
          }
 
       return false;
