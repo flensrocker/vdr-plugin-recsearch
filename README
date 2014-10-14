@@ -58,6 +58,8 @@ search term:
  Enter one or more search terms splitted with '|' (pipe).
  Title, short text and description of the recordings will be searched,
  case will be ignored.
+ If the term starts with "t:" only the title will be scanned, with "s:"
+ only the short text and with "d:" only the description.
 
 status:
  Restrict the results to only new or edited recordings.
