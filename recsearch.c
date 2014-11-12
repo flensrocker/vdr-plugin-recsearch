@@ -175,41 +175,60 @@ static void extract_tag(const char *text, const char *term, const char *term_pre
      }
 }
 
-static void scan_tags(cNestedItemList &tags)
+static void scan_tags(cNestedItemList &tags, const char *title, const char *shorttext, const char *description)
+{
+  const char *term;
+  int look_into; // bit 1: title, bit 2: shorttext, bit 3: description
+  for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
+      term = tag->Text();
+      look_into = 7;
+      if ((strlen(term) > 2) && (term[1] == ':')) {
+         if ((term[0] == 't') || (term[0] == 'T'))
+            look_into = 1;
+         else if ((term[0] == 's') || (term[0] == 'S'))
+            look_into = 2;
+         else if ((term[0] == 'd') || (term[0] == 'D'))
+            look_into = 4;
+         if (look_into != 7)
+            term += 2;
+         }
+
+      if ((look_into & 1) != 0)
+         extract_tag(title, term, (look_into == 1) ? "t:" : "", tag);
+
+      if ((look_into & 2) != 0)
+         extract_tag(shorttext, term, (look_into == 2) ? "s:" : "", tag);
+
+      if ((look_into & 4) != 0)
+         extract_tag(description, term, (look_into == 4) ? "d:" : "", tag);
+      }
+}
+
+static void scan_recordings(cNestedItemList &tags)
 {
   cThreadLock RecordingsLock(&Recordings);
   const cRecordingInfo *info;
-  const char *term;
-  int look_into; // bit 1: title, bit 2: shorttext, bit 3: description
   for (cRecording *recording = Recordings.First(); recording; recording = Recordings.Next(recording)) {
       info = recording->Info();
       if (info == NULL)
          continue;
 
-      for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
-          term = tag->Text();
-          look_into = 7;
-          if ((strlen(term) > 2) && (term[1] == ':')) {
-             if ((term[0] == 't') || (term[0] == 'T'))
-                look_into = 1;
-             else if ((term[0] == 's') || (term[0] == 'S'))
-                look_into = 2;
-             else if ((term[0] == 'd') || (term[0] == 'D'))
-                look_into = 4;
-             if (look_into != 7)
-                term += 2;
-             }
-
-          if ((look_into & 1) != 0)
-             extract_tag(info->Title(), term, (look_into == 1) ? "t:" : "", tag);
-
-          if ((look_into & 2) != 0)
-             extract_tag(info->ShortText(), term, (look_into == 2) ? "s:" : "", tag);
-
-          if ((look_into & 4) != 0)
-             extract_tag(info->Description(), term, (look_into == 4) ? "d:" : "", tag);
-          }
+      scan_tags(tags, info->Title(), info->ShortText(), info->Description());
       }
+}
+
+static void scan_events(cNestedItemList &tags)
+{
+  cSchedulesLock lock;
+  const cSchedules *ss = cSchedules::Schedules(lock);
+  if (ss) {
+     for (const cSchedule *s = ss->First(); s; s = ss->Next(s)) {
+         const cList<cEvent> *es = s->Events();
+         for (cEvent *e = es->First(); e; e = es->Next(e)) {
+             scan_tags(tags, e->Title(), e->ShortText(), e->Description());
+             }
+         }
+     }
 }
 
 bool cPluginRecsearch::Service(const char *Id, void *Data)
@@ -228,6 +247,8 @@ const char **cPluginRecsearch::SVDRPHelpPages(void)
     "    The colon is added to the tag, it can be prefixed with\n"
     "    't:', 's:', 'd:' to search only in title, short text or\n"
     "    description instead of all fields",
+    "ESCN <tag>\n"
+    "    Like SCAN only the events are scanned.",
     NULL
     };
   return HelpPages;
@@ -236,7 +257,7 @@ const char **cPluginRecsearch::SVDRPHelpPages(void)
 cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
 {
   // Process SVDRP commands this plugin implements
-  if (strcasecmp(Command, "SCAN") == 0) {
+  if ((strcasecmp(Command, "SCAN") == 0) || (strcasecmp(Command, "ESCN") == 0)) {
      if (Option && *Option) {
         cNestedItemList tags;
         tags.Add(new cNestedItem(*cString::sprintf("%s:", Option), true));
@@ -244,7 +265,10 @@ cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, 
         //tags.Add(new cNestedItem("d:Kategorie:", true));
         //tags.Add(new cNestedItem("d:Land:", true));
         //tags.Add(new cNestedItem("d:Staffel:", true));
-        scan_tags(tags);
+        if (strcasecmp(Command, "ESCN") == 0)
+           scan_events(tags);
+        else
+           scan_recordings(tags);
 
         cString reply = "";
         for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
