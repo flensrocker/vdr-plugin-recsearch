@@ -128,51 +128,63 @@ bool cPluginRecsearch::SetupParse(const char *Name, const char *Value)
   return false;
 }
 
-static void extract_tag(const char *text, const char *term, const char *term_prefix, cNestedItem *tag)
+static bool extract_tag(const char *text, const char *term, const char *term_prefix, cNestedItem *tag)
 {
   if ((text == NULL) || (term == NULL) || (tag == NULL) || (tag->SubItems() == NULL))
-     return;
+     return false;
 
-  const char *result = strcasestr(text, term);
-  if (result == NULL)
-     return;
+  const char *result = NULL;
+  int t_len = 0;
+  do {
+       result = strcasestr(text, term);
+       if (result == NULL)
+          return false;
 
-  result += strlen(term);
-  int r_len = strlen(result);
-  if (r_len > 0) {
-     int t_len = 0;
-     while ((t_len < r_len) && (result[t_len] != '\n'))
-           t_len++;
-     if (t_len > 0) {
-        char *tag_text = new char[t_len + 1];
-        memcpy(tag_text, result, t_len);
-        tag_text[t_len] = 0;
-        const char *name = skipspace(tag_text);
-        bool found = false;
-        for (cNestedItem *t = tag->SubItems()->First(); t; t = tag->SubItems()->Next(t)) {
-            if ((t->Text() != NULL) && (t->SubItems() != NULL) && (strcmp(t->Text(), name) == 0)) {
-               found = true;
-               cString tag_term = cString::sprintf("%s%s%s", term_prefix, term, tag_text);
-               bool item_found = false;
-               for (cNestedItem *i = t->SubItems()->First(); i; i = t->SubItems()->Next(i)) {
-                   if ((i->Text() != NULL) && (strcmp(i->Text(), *tag_term) == 0)) {
-                      item_found = true;
-                      break;
-                      }
-                   }
-               if (!item_found)
-                  t->AddSubItem(new cNestedItem(*tag_term));
-               break;
-               }
-            }
-        if (!found) {
-           cNestedItem *item = new cNestedItem(name, true);
-           item->AddSubItem(new cNestedItem(*cString::sprintf("%s%s%s", term_prefix, term, tag_text)));
-           tag->AddSubItem(item);
-           }
-        delete [] tag_text;
-        }
+       if ((result > text) && (text[result - text - 1] != '\n')) {
+          text = result + strlen(term);
+          continue;
+          }
+
+       result += strlen(term);
+       text = result;
+       int r_len = strlen(result);
+       if (r_len <= 0)
+          return false;
+
+       t_len = 0;
+       while ((t_len < r_len) && (result[t_len] != '\n'))
+             t_len++;
+
+     } while (t_len <= 0);
+
+  char *tag_text = new char[t_len + 1];
+  memcpy(tag_text, result, t_len);
+  tag_text[t_len] = 0;
+  const char *name = skipspace(tag_text);
+  bool found = false;
+  for (cNestedItem *t = tag->SubItems()->First(); t; t = tag->SubItems()->Next(t)) {
+      if ((t->Text() != NULL) && (t->SubItems() != NULL) && (strcmp(t->Text(), name) == 0)) {
+         found = true;
+         cString tag_term = cString::sprintf("%s%s%s", term_prefix, term, tag_text);
+         bool item_found = false;
+         for (cNestedItem *i = t->SubItems()->First(); i; i = t->SubItems()->Next(i)) {
+             if ((i->Text() != NULL) && (strcmp(i->Text(), *tag_term) == 0)) {
+                item_found = true;
+                break;
+                }
+             }
+         if (!item_found)
+            t->AddSubItem(new cNestedItem(*tag_term));
+         break;
+         }
+      }
+  if (!found) {
+     cNestedItem *item = new cNestedItem(name, true);
+     item->AddSubItem(new cNestedItem(*cString::sprintf("%s%s%s", term_prefix, term, tag_text)));
+     tag->AddSubItem(item);
      }
+  delete [] tag_text;
+  return true;
 }
 
 static void scan_tags(cNestedItemList &tags, const char *title, const char *shorttext, const char *description)
