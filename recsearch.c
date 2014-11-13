@@ -272,17 +272,23 @@ cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, 
   if ((strcasecmp(Command, "SCAN") == 0) || (strcasecmp(Command, "ESCN") == 0)) {
      if (Option && *Option) {
         cNestedItemList tags;
-        tags.Add(new cNestedItem(*cString::sprintf("%s:", Option), true));
-        //tags.Add(new cNestedItem("d:Genre:", true));
-        //tags.Add(new cNestedItem("d:Kategorie:", true));
-        //tags.Add(new cNestedItem("d:Land:", true));
-        //tags.Add(new cNestedItem("d:Staffel:", true));
+
+        char *strtok_next;
+        char *o = strdup(Option);
+        for (char *t = strtok_r(o, "|", &strtok_next); t; t = strtok_r(NULL, "|", &strtok_next))
+            tags.Add(new cNestedItem(*cString::sprintf("%s:", t), true));
+        free(o);
+
+        isyslog("recsearch: start scanning");
+        cTimeMs stopwatch;
         if (strcasecmp(Command, "ESCN") == 0)
            scan_events(tags);
         else
            scan_recordings(tags);
+        uint64_t elapsed = stopwatch.Elapsed();
+        isyslog("recsearch: finished scanning in %dms", elapsed);
 
-        cString reply = "";
+        cString reply = "scan results:";
         for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
             tag->SubItems()->Sort();
             const char *term = tag->Text();
