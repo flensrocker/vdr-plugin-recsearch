@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.3.4";
+static const char *VERSION        = "0.3.5";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 
@@ -381,7 +381,7 @@ cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, 
            count = scan_recordings(tags);
         uint64_t elapsed = stopwatch.Elapsed();
 
-        cString reply = cString::sprintf("scanned %d items in %"PRIu64"ms:\n", count, elapsed);
+        cString reply = cString::sprintf("scanned %d items in %dms:\n", count, (int)elapsed);
         for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
             tag->SubItems()->Sort();
             const char *term = tag->Text();
@@ -422,7 +422,7 @@ cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, 
            count = filter_recordings(terms, found);
         uint64_t elapsed = stopwatch.Elapsed();
         ReplyCode = 250;
-        return cString::sprintf("scanned %d items in %"PRIu64"ms and found %d matches", count, elapsed, found);
+        return cString::sprintf("scanned %d items in %dms and found %d matches", count, (int)elapsed, found);
         }
      ReplyCode = 501;
      return "missing search term";
