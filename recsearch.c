@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.3.2";
+static const char *VERSION        = "0.3.3";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 
@@ -128,88 +128,125 @@ bool cPluginRecsearch::SetupParse(const char *Name, const char *Value)
   return false;
 }
 
-static void extract_tag(const char *text, const char *term, const char *term_prefix, cNestedItem *tag)
+static bool extract_tag(const char *text, const char *term, const char *term_prefix, cNestedItem *tag)
 {
   if ((text == NULL) || (term == NULL) || (tag == NULL) || (tag->SubItems() == NULL))
-     return;
+     return false;
 
-  const char *result = strcasestr(text, term);
-  if (result == NULL)
-     return;
+  const char *result = NULL;
+  int t_len = 0;
+  do {
+       result = strcasestr(text, term);
+       if (result == NULL)
+          return false;
 
-  result += strlen(term);
-  int r_len = strlen(result);
-  if (r_len > 0) {
-     int t_len = 0;
-     while ((t_len < r_len) && (result[t_len] != '\n'))
-           t_len++;
-     if (t_len > 0) {
-        char *tag_text = new char[t_len + 1];
-        memcpy(tag_text, result, t_len);
-        tag_text[t_len] = 0;
-        const char *name = skipspace(tag_text);
-        bool found = false;
-        for (cNestedItem *t = tag->SubItems()->First(); t; t = tag->SubItems()->Next(t)) {
-            if ((t->Text() != NULL) && (t->SubItems() != NULL) && (strcmp(t->Text(), name) == 0)) {
-               found = true;
-               cString tag_term = cString::sprintf("%s%s%s", term_prefix, term, tag_text);
-               bool item_found = false;
-               for (cNestedItem *i = t->SubItems()->First(); i; i = t->SubItems()->Next(i)) {
-                   if ((i->Text() != NULL) && (strcmp(i->Text(), *tag_term) == 0)) {
-                      item_found = true;
-                      break;
-                      }
-                   }
-               if (!item_found)
-                  t->AddSubItem(new cNestedItem(*tag_term));
-               break;
-               }
-            }
-        if (!found) {
-           cNestedItem *item = new cNestedItem(name, true);
-           item->AddSubItem(new cNestedItem(*cString::sprintf("%s%s%s", term_prefix, term, tag_text)));
-           tag->AddSubItem(item);
-           }
-        delete [] tag_text;
-        }
+       if ((result > text) && (text[result - text - 1] != '\n')) {
+          text = result + strlen(term);
+          continue;
+          }
+
+       result += strlen(term);
+       text = result;
+       int r_len = strlen(result);
+       if (r_len <= 0)
+          return false;
+
+       t_len = 0;
+       while ((t_len < r_len) && (result[t_len] != '\n'))
+             t_len++;
+
+     } while (t_len <= 0);
+
+  char *tag_text = new char[t_len + 1];
+  memcpy(tag_text, result, t_len);
+  tag_text[t_len] = 0;
+  const char *name = skipspace(tag_text);
+  bool found = false;
+  for (cNestedItem *t = tag->SubItems()->First(); t; t = tag->SubItems()->Next(t)) {
+      if ((t->Text() != NULL) && (t->SubItems() != NULL) && (strcmp(t->Text(), name) == 0)) {
+         found = true;
+         cString tag_term = cString::sprintf("%s%s%s", term_prefix, term, tag_text);
+         bool item_found = false;
+         for (cNestedItem *i = t->SubItems()->First(); i; i = t->SubItems()->Next(i)) {
+             if ((i->Text() != NULL) && (strcmp(i->Text(), *tag_term) == 0)) {
+                item_found = true;
+                break;
+                }
+             }
+         if (!item_found)
+            t->AddSubItem(new cNestedItem(*tag_term));
+         break;
+         }
+      }
+  if (!found) {
+     cNestedItem *item = new cNestedItem(name, true);
+     item->AddSubItem(new cNestedItem(*cString::sprintf("%s%s%s", term_prefix, term, tag_text)));
+     tag->AddSubItem(item);
      }
+  delete [] tag_text;
+  return true;
 }
 
-static void scan_tags(cNestedItemList &tags)
+static void scan_tags(cNestedItemList &tags, const char *title, const char *shorttext, const char *description)
 {
-  cThreadLock RecordingsLock(&Recordings);
-  const cRecordingInfo *info;
   const char *term;
   int look_into; // bit 1: title, bit 2: shorttext, bit 3: description
+  for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
+      term = tag->Text();
+      look_into = 7;
+      if ((strlen(term) > 2) && (term[1] == ':')) {
+         if ((term[0] == 't') || (term[0] == 'T'))
+            look_into = 1;
+         else if ((term[0] == 's') || (term[0] == 'S'))
+            look_into = 2;
+         else if ((term[0] == 'd') || (term[0] == 'D'))
+            look_into = 4;
+         if (look_into != 7)
+            term += 2;
+         }
+
+      if ((look_into & 1) != 0)
+         extract_tag(title, term, (look_into == 1) ? "t:" : "", tag);
+
+      if ((look_into & 2) != 0)
+         extract_tag(shorttext, term, (look_into == 2) ? "s:" : "", tag);
+
+      if ((look_into & 4) != 0)
+         extract_tag(description, term, (look_into == 4) ? "d:" : "", tag);
+      }
+}
+
+static int scan_recordings(cNestedItemList &tags)
+{
+  int count = 0;
+  cThreadLock RecordingsLock(&Recordings);
+  const cRecordingInfo *info;
   for (cRecording *recording = Recordings.First(); recording; recording = Recordings.Next(recording)) {
       info = recording->Info();
       if (info == NULL)
          continue;
 
-      for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
-          term = tag->Text();
-          look_into = 7;
-          if ((strlen(term) > 2) && (term[1] == ':')) {
-             if ((term[0] == 't') || (term[0] == 'T'))
-                look_into = 1;
-             else if ((term[0] == 's') || (term[0] == 'S'))
-                look_into = 2;
-             else if ((term[0] == 'd') || (term[0] == 'D'))
-                look_into = 4;
-             if (look_into != 7)
-                term += 2;
-             }
-
-          if ((look_into & 1) != 0)
-             extract_tag(info->Title(), term, (look_into == 1) ? "t:" : "", tag);
-
-          if ((look_into & 2) != 0)
-             extract_tag(info->ShortText(), term, (look_into == 2) ? "s:" : "", tag);
-
-          if ((look_into & 4) != 0)
-             extract_tag(info->Description(), term, (look_into == 4) ? "d:" : "", tag);
-          }
+      scan_tags(tags, info->Title(), info->ShortText(), info->Description());
+      count++;
       }
+  return count;
+}
+
+static int scan_events(cNestedItemList &tags)
+{
+  int count = 0;
+  cSchedulesLock lock;
+  const cSchedules *ss = cSchedules::Schedules(lock);
+  if (ss) {
+     for (const cSchedule *s = ss->First(); s; s = ss->Next(s)) {
+         const cList<cEvent> *es = s->Events();
+         for (cEvent *e = es->First(); e; e = es->Next(e)) {
+             scan_tags(tags, e->Title(), e->ShortText(), e->Description());
+             count++;
+             }
+         }
+     }
+  return count;
 }
 
 bool cPluginRecsearch::Service(const char *Id, void *Data)
@@ -228,6 +265,8 @@ const char **cPluginRecsearch::SVDRPHelpPages(void)
     "    The colon is added to the tag, it can be prefixed with\n"
     "    't:', 's:', 'd:' to search only in title, short text or\n"
     "    description instead of all fields",
+    "ESCN <tag>\n"
+    "    Like SCAN only the events are scanned.",
     NULL
     };
   return HelpPages;
@@ -236,17 +275,25 @@ const char **cPluginRecsearch::SVDRPHelpPages(void)
 cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
 {
   // Process SVDRP commands this plugin implements
-  if (strcasecmp(Command, "SCAN") == 0) {
+  if ((strcasecmp(Command, "SCAN") == 0) || (strcasecmp(Command, "ESCN") == 0)) {
      if (Option && *Option) {
         cNestedItemList tags;
-        tags.Add(new cNestedItem(*cString::sprintf("%s:", Option), true));
-        //tags.Add(new cNestedItem("d:Genre:", true));
-        //tags.Add(new cNestedItem("d:Kategorie:", true));
-        //tags.Add(new cNestedItem("d:Land:", true));
-        //tags.Add(new cNestedItem("d:Staffel:", true));
-        scan_tags(tags);
 
-        cString reply = "";
+        char *strtok_next;
+        char *o = strdup(Option);
+        for (char *t = strtok_r(o, "|", &strtok_next); t; t = strtok_r(NULL, "|", &strtok_next))
+            tags.Add(new cNestedItem(*cString::sprintf("%s:", t), true));
+        free(o);
+
+        int count = 0;
+        cTimeMs stopwatch;
+        if (strcasecmp(Command, "ESCN") == 0)
+           count = scan_events(tags);
+        else
+           count = scan_recordings(tags);
+        uint64_t elapsed = stopwatch.Elapsed();
+
+        cString reply = cString::sprintf("scanned %d items in %"PRIu64"ms:\n", count, elapsed);
         for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
             tag->SubItems()->Sort();
             const char *term = tag->Text();
