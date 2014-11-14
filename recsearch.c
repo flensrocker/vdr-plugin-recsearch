@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.3.3";
+static const char *VERSION        = "0.3.4";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 
@@ -249,6 +249,90 @@ static int scan_events(cNestedItemList &tags)
   return count;
 }
 
+static bool filter(const char *term, const char *title, const char *shorttext, const char *description)
+{
+  int look_into = 7; // bit 1: title, bit 2: shorttext, bit 3: description
+
+  if ((strlen(term) > 2) && (term[1] == ':')) {
+     if ((term[0] == 't') || (term[0] == 'T'))
+        look_into = 1;
+     else if ((term[0] == 's') || (term[0] == 'S'))
+        look_into = 2;
+     else if ((term[0] == 'd') || (term[0] == 'D'))
+        look_into = 4;
+     if (look_into != 7)
+        term += 2;
+     }
+
+  if ((look_into & 1) != 0) {
+     if ((title != NULL) && (strcasestr(title, term) != NULL))
+        return true;
+     }
+
+  if ((look_into & 2) != 0) {
+     if ((shorttext != NULL) && (strcasestr(shorttext, term) != NULL))
+        return true;
+     }
+
+  if ((look_into & 4) != 0) {
+     if ((description != NULL) && (strcasestr(description, term) != NULL))
+        return true;
+     }
+
+  return false;
+}
+
+static int filter_recordings(const cStringList &terms, int &found)
+{
+  int count = 0;
+  int matches = 0;
+  int size = terms.Size();
+  cThreadLock RecordingsLock(&Recordings);
+  const cRecordingInfo *info;
+  for (cRecording *recording = Recordings.First(); recording; recording = Recordings.Next(recording)) {
+      info = recording->Info();
+      if (info == NULL)
+         continue;
+
+      matches = 0;
+      for (int i = 0; i < size; i++) {
+          if (filter(terms[i], info->Title(), info->ShortText(), info->Description()))
+             matches++;
+          }
+      if (matches == size)
+         found++;
+
+      count++;
+      }
+  return count;
+}
+
+static int filter_events(const cStringList &terms, int &found)
+{
+  int count = 0;
+  int matches = 0;
+  int size = terms.Size();
+  cSchedulesLock lock;
+  const cSchedules *ss = cSchedules::Schedules(lock);
+  if (ss) {
+     for (const cSchedule *s = ss->First(); s; s = ss->Next(s)) {
+         const cList<cEvent> *es = s->Events();
+         for (cEvent *e = es->First(); e; e = es->Next(e)) {
+             matches = 0;
+             for (int i = 0; i < size; i++) {
+                 if (filter(terms[i], e->Title(), e->ShortText(), e->Description()))
+                    matches++;
+                 }
+             if (matches == size)
+                found++;
+
+             count++;
+             }
+         }
+     }
+  return count;
+}
+
 bool cPluginRecsearch::Service(const char *Id, void *Data)
 {
   // Handle custom service requests from other plugins
@@ -267,6 +351,10 @@ const char **cPluginRecsearch::SVDRPHelpPages(void)
     "    description instead of all fields",
     "ESCN <tag>\n"
     "    Like SCAN only the events are scanned.",
+    "FLTR <term>|<term>|<term>\n"
+    "    Search all recordings for the given terms (all terms must match).",
+    "FLTE <term>|<term>|<term>\n"
+    "    Search all events for the given terms (all terms must match).",
     NULL
     };
   return HelpPages;
@@ -314,6 +402,30 @@ cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, 
         }
      ReplyCode = 501;
      return "missing tag";
+     }
+  else if ((strcasecmp(Command, "FLTR") == 0) || (strcasecmp(Command, "FLTE") == 0)) {
+     if (Option && *Option) {
+        cStringList terms;
+
+        char *strtok_next;
+        char *o = strdup(Option);
+        for (char *t = strtok_r(o, "|", &strtok_next); t; t = strtok_r(NULL, "|", &strtok_next))
+            terms.Append(strdup(t));
+        free(o);
+
+        int count = 0;
+        int found = 0;
+        cTimeMs stopwatch;
+        if (strcasecmp(Command, "FLTE") == 0)
+           count = filter_events(terms, found);
+        else
+           count = filter_recordings(terms, found);
+        uint64_t elapsed = stopwatch.Elapsed();
+        ReplyCode = 250;
+        return cString::sprintf("scanned %d items in %"PRIu64"ms and found %d matches", count, elapsed, found);
+        }
+     ReplyCode = 501;
+     return "missing search term";
      }
   return NULL;
 }
