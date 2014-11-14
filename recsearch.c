@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.3.2";
+static const char *VERSION        = "0.3.3";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 
@@ -216,8 +216,9 @@ static void scan_tags(cNestedItemList &tags, const char *title, const char *shor
       }
 }
 
-static void scan_recordings(cNestedItemList &tags)
+static int scan_recordings(cNestedItemList &tags)
 {
+  int count = 0;
   cThreadLock RecordingsLock(&Recordings);
   const cRecordingInfo *info;
   for (cRecording *recording = Recordings.First(); recording; recording = Recordings.Next(recording)) {
@@ -226,11 +227,14 @@ static void scan_recordings(cNestedItemList &tags)
          continue;
 
       scan_tags(tags, info->Title(), info->ShortText(), info->Description());
+      count++;
       }
+  return count;
 }
 
-static void scan_events(cNestedItemList &tags)
+static int scan_events(cNestedItemList &tags)
 {
+  int count = 0;
   cSchedulesLock lock;
   const cSchedules *ss = cSchedules::Schedules(lock);
   if (ss) {
@@ -238,9 +242,11 @@ static void scan_events(cNestedItemList &tags)
          const cList<cEvent> *es = s->Events();
          for (cEvent *e = es->First(); e; e = es->Next(e)) {
              scan_tags(tags, e->Title(), e->ShortText(), e->Description());
+             count++;
              }
          }
      }
+  return count;
 }
 
 bool cPluginRecsearch::Service(const char *Id, void *Data)
@@ -279,16 +285,15 @@ cString cPluginRecsearch::SVDRPCommand(const char *Command, const char *Option, 
             tags.Add(new cNestedItem(*cString::sprintf("%s:", t), true));
         free(o);
 
-        isyslog("recsearch: start scanning");
+        int count = 0;
         cTimeMs stopwatch;
         if (strcasecmp(Command, "ESCN") == 0)
-           scan_events(tags);
+           count = scan_events(tags);
         else
-           scan_recordings(tags);
+           count = scan_recordings(tags);
         uint64_t elapsed = stopwatch.Elapsed();
-        isyslog("recsearch: finished scanning in %dms", elapsed);
 
-        cString reply = "scan results:";
+        cString reply = cString::sprintf("scanned %d items in %"PRIu64"ms:\n", count, elapsed);
         for (cNestedItem *tag = tags.First(); tag; tag = tags.Next(tag)) {
             tag->SubItems()->Sort();
             const char *term = tag->Text();
