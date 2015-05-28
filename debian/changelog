@@ -1,4 +1,4 @@
-vdr-plugin-recsearch (0.3.5-1yavdr0~trusty) trusty; urgency=medium
+vdr-plugin-recsearch (0.3.5-1yavdr1~trusty) trusty; urgency=medium
 
   * convert to conf.d
 
