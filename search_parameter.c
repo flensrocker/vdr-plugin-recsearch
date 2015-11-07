@@ -379,19 +379,24 @@ recsearch::cSearches recsearch::cSearches::Last;
 recsearch::cSearches recsearch::cSearches::Searches;
 const char *recsearch::cSearches::CatDelim = "~";
 
-recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParameter &Parameter) const
+const recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParameter &Parameter) const
 {
-  for (cSearchParameter *p = First(); p; p = Next(p)) {
+  for (const cSearchParameter *p = First(); p; p = Next(p)) {
       if (p->Compare(Parameter) == 0)
          return p;
       }
   return NULL;
 }
 
-recsearch::cSearchParameter *recsearch::cSearches::GetHotKey(int HotKey) const
+recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParameter &Parameter)
+{
+  return const_cast<recsearch::cSearchParameter *>(Contains(Parameter));
+}
+
+const recsearch::cSearchParameter *recsearch::cSearches::GetHotKey(int HotKey) const
 {
   if (HotKey > 0) {
-     for (cSearchParameter *p = First(); p; p = Next(p)) {
+     for (const cSearchParameter *p = First(); p; p = Next(p)) {
          if (p->HotKey() == HotKey)
             return p;
          }
@@ -402,7 +407,7 @@ recsearch::cSearchParameter *recsearch::cSearches::GetHotKey(int HotKey) const
 void recsearch::cSearches::GetCategories(cStringList &Categories) const
 {
   Categories.Clear();
-  for (cSearchParameter *p = First(); p; p = Next(p)) {
+  for (const cSearchParameter *p = First(); p; p = Next(p)) {
       const char *c = p->Category();
       if (!isempty(c) && (Categories.Find(c) < 0))
          Categories.Append(strdup(c));
@@ -423,7 +428,7 @@ static cNestedItem *find_nested_item(cList<cNestedItem> *List, const char *Text)
 void recsearch::cSearches::GetCatMenus(cList<cNestedItem> *CatMenus) const
 {
   CatMenus->Clear();
-  for (cSearchParameter *p = First(); p; p = Next(p)) {
+  for (const cSearchParameter *p = First(); p; p = Next(p)) {
       char *c = strdup(p->Category());
       if (isempty(c))
          CatMenus->Add(new cNestedItem(*p->ToString()));

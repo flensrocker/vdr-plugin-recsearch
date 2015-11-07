@@ -68,8 +68,9 @@ namespace recsearch
     static const char *CatDelim;
 
     void SetFilename(const cString &Filename) { _filename = Filename; };
-    cSearchParameter *Contains(const cSearchParameter &Parameter) const;
-    cSearchParameter *GetHotKey(int HotKey) const;
+    const cSearchParameter *Contains(const cSearchParameter &Parameter) const;
+    cSearchParameter *Contains(const cSearchParameter &Parameter);
+    const cSearchParameter *GetHotKey(int HotKey) const;
     void GetCategories(cStringList &Categories) const;
     void GetCatMenus(cList<cNestedItem> *CatMenus) const;
     bool LoadSearches(void);
