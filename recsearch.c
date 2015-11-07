@@ -10,7 +10,7 @@
 
 #include <vdr/plugin.h>
 
-static const char *VERSION        = "0.3.5";
+static const char *VERSION        = "0.3.6";
 static const char *DESCRIPTION    = tr("search your recordings");
 static const char *MAINMENUENTRY  = tr("search recordings");
 
@@ -219,9 +219,15 @@ static void scan_tags(cNestedItemList &tags, const char *title, const char *shor
 static int scan_recordings(cNestedItemList &tags)
 {
   int count = 0;
-  cThreadLock RecordingsLock(&Recordings);
   const cRecordingInfo *info;
-  for (cRecording *recording = Recordings.First(); recording; recording = Recordings.Next(recording)) {
+#if VDRVERSNUM > 20300
+  LOCK_RECORDINGS_READ;
+  const cRecordings *vdrrecordings = Recordings;
+#else
+  cRecordings *vdrrecordings = &Recordings;
+  cThreadLock RecordingsLock(vdrrecordings);
+#endif
+  for (const cRecording *recording = vdrrecordings->First(); recording; recording = vdrrecordings->Next(recording)) {
       info = recording->Info();
       if (info == NULL)
          continue;
@@ -235,12 +241,17 @@ static int scan_recordings(cNestedItemList &tags)
 static int scan_events(cNestedItemList &tags)
 {
   int count = 0;
+#if VDRVERSNUM > 20300
+  LOCK_SCHEDULES_READ;
+  const cSchedules *ss = Schedules;
+#else
   cSchedulesLock lock;
   const cSchedules *ss = cSchedules::Schedules(lock);
+#endif
   if (ss) {
      for (const cSchedule *s = ss->First(); s; s = ss->Next(s)) {
          const cList<cEvent> *es = s->Events();
-         for (cEvent *e = es->First(); e; e = es->Next(e)) {
+         for (const cEvent *e = es->First(); e; e = es->Next(e)) {
              scan_tags(tags, e->Title(), e->ShortText(), e->Description());
              count++;
              }
@@ -287,9 +298,15 @@ static int filter_recordings(const cStringList &terms, int &found)
   int count = 0;
   int matches = 0;
   int size = terms.Size();
-  cThreadLock RecordingsLock(&Recordings);
   const cRecordingInfo *info;
-  for (cRecording *recording = Recordings.First(); recording; recording = Recordings.Next(recording)) {
+#if VDRVERSNUM > 20300
+  LOCK_RECORDINGS_READ;
+  const cRecordings *vdrrecordings = Recordings;
+#else
+  cRecordings *vdrrecordings = &Recordings;
+  cThreadLock RecordingsLock(vdrrecordings);
+#endif
+  for (const cRecording *recording = vdrrecordings->First(); recording; recording = vdrrecordings->Next(recording)) {
       info = recording->Info();
       if (info == NULL)
          continue;
@@ -312,12 +329,17 @@ static int filter_events(const cStringList &terms, int &found)
   int count = 0;
   int matches = 0;
   int size = terms.Size();
+#if VDRVERSNUM > 20300
+  LOCK_SCHEDULES_READ;
+  const cSchedules *ss = Schedules;
+#else
   cSchedulesLock lock;
   const cSchedules *ss = cSchedules::Schedules(lock);
+#endif
   if (ss) {
      for (const cSchedule *s = ss->First(); s; s = ss->Next(s)) {
          const cList<cEvent> *es = s->Events();
-         for (cEvent *e = es->First(); e; e = es->Next(e)) {
+         for (const cEvent *e = es->First(); e; e = es->Next(e)) {
              matches = 0;
              for (int i = 0; i < size; i++) {
                  if (filter(terms[i], e->Title(), e->ShortText(), e->Description()))

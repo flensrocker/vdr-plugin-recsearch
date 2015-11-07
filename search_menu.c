@@ -347,7 +347,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
         {
          int hotkey = Key - k0;
          cSearches::Searches.LoadSearches();
-         cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
+         const cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
          if (p != NULL)
             return AddSubMenu(new cSearchResult(new cSearchParameter(*p)));
          break;
@@ -487,7 +487,7 @@ eOSState recsearch::cMainMenu::ProcessKey(eKeys Key)
         {
          int hotkey = Key - k0;
          cSearches::Searches.LoadSearches();
-         cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
+         const cSearchParameter *p = cSearches::Searches.GetHotKey(hotkey);
          if (p != NULL)
             return AddSubMenu(new cSearchResult(new cSearchParameter(*p)));
          break;
