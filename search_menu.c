@@ -496,7 +496,7 @@ eOSState recsearch::cMainMenu::ProcessKey(eKeys Key)
         {
          if (item != NULL)
             return AddSubMenu(new cSearchMenu(new cSearchParameter(*(item->_parameter))));
-         return osContinue;;
+         return osContinue;
         }
        case kGreen:
         {
