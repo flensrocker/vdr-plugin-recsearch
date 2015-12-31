@@ -1,3 +1,9 @@
+vdr-plugin-recsearch (0.3.7-0yavdr0~trusty) trusty; urgency=medium
+
+  * new upstream release
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Thu, 31 Dec 2015 12:29:08 +0100
+
 vdr-plugin-recsearch (0.3.6-0yavdr0~trusty) trusty; urgency=medium
 
   * new upstream release
