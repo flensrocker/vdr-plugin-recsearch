@@ -374,7 +374,7 @@ eOSState recsearch::cSearchMenu::ProcessKey(eKeys Key)
         {
          if (Interface->Confirm(tr("delete shown search template?"))) {
             cSearches::Searches.LoadSearches();
-            cSearchParameter *p = cSearches::Searches.Contains(_data);
+            cSearchParameter *p = const_cast<cSearchParameter *>(cSearches::Searches.Contains(_data));
             if (p != NULL) {
                cSearches::Searches.Del(p);
                cSearches::Searches.Save();
@@ -496,7 +496,7 @@ eOSState recsearch::cMainMenu::ProcessKey(eKeys Key)
         {
          if (item != NULL)
             return AddSubMenu(new cSearchMenu(new cSearchParameter(*(item->_parameter))));
-         return osContinue;;
+         return osContinue;
         }
        case kGreen:
         {
@@ -511,7 +511,7 @@ eOSState recsearch::cMainMenu::ProcessKey(eKeys Key)
          if (item != NULL) {
             if (Interface->Confirm(tr("delete selected search template?"))) {
                cSearches::Searches.LoadSearches();
-               cSearchParameter *p = cSearches::Searches.Contains(*(item->_parameter));
+               cSearchParameter *p = const_cast<cSearchParameter *>(cSearches::Searches.Contains(*(item->_parameter)));
                if (p != NULL) {
                   cSearches::Searches.Del(p);
                   cSearches::Searches.Save();
