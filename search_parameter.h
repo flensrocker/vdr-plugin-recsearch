@@ -69,7 +69,6 @@ namespace recsearch
 
     void SetFilename(const cString &Filename) { _filename = Filename; };
     const cSearchParameter *Contains(const cSearchParameter &Parameter) const;
-    cSearchParameter *Contains(const cSearchParameter &Parameter);
     const cSearchParameter *GetHotKey(int HotKey) const;
     void GetCategories(cStringList &Categories) const;
     void GetCatMenus(cList<cNestedItem> *CatMenus) const;

@@ -388,11 +388,6 @@ const recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchP
   return NULL;
 }
 
-recsearch::cSearchParameter *recsearch::cSearches::Contains(const cSearchParameter &Parameter)
-{
-  return const_cast<recsearch::cSearchParameter *>(Contains(Parameter));
-}
-
 const recsearch::cSearchParameter *recsearch::cSearches::GetHotKey(int HotKey) const
 {
   if (HotKey > 0) {
