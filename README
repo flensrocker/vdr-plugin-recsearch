@@ -60,6 +60,8 @@ search term:
  case will be ignored.
  If the term starts with "t:" only the title will be scanned, with "s:"
  only the short text and with "d:" only the description.
+ If the search term must not be contained,
+ prefix it with an ! (exclamation mark).
 
 status:
  Restrict the results to only new or edited recordings.
