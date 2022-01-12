@@ -260,6 +260,17 @@ static int scan_events(cNestedItemList &tags)
   return count;
 }
 
+static bool filter_matches(const char *text, const char *term)
+{
+  if (text == NULL)
+     return false;
+
+  if (strlen(term) > 1 && term[0] == '!')
+     return strcasestr(text, term + 1) == NULL;
+
+  return strcasestr(text, term) != NULL;
+}
+
 static bool filter(const char *term, const char *title, const char *shorttext, const char *description)
 {
   int look_into = 7; // bit 1: title, bit 2: shorttext, bit 3: description
@@ -275,20 +286,14 @@ static bool filter(const char *term, const char *title, const char *shorttext, c
         term += 2;
      }
 
-  if ((look_into & 1) != 0) {
-     if ((title != NULL) && (strcasestr(title, term) != NULL))
-        return true;
-     }
+  if ((look_into & 1) != 0 && filter_matches(title, term))
+     return true;
 
-  if ((look_into & 2) != 0) {
-     if ((shorttext != NULL) && (strcasestr(shorttext, term) != NULL))
-        return true;
-     }
+  if ((look_into & 2) != 0 && filter_matches(shorttext, term))
+     return true;
 
-  if ((look_into & 4) != 0) {
-     if ((description != NULL) && (strcasestr(description, term) != NULL))
-        return true;
-     }
+  if ((look_into & 4) != 0 && filter_matches(description, term))
+     return true;
 
   return false;
 }
