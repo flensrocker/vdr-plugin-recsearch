@@ -61,7 +61,7 @@ search term:
  If the term starts with "t:" only the title will be scanned, with "s:"
  only the short text and with "d:" only the description.
  If the search term must not be contained,
- prefix it with an ! (exclamation mark).
+ prefix it with an ^.
 
 status:
  Restrict the results to only new or edited recordings.

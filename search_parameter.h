@@ -12,6 +12,8 @@ namespace recsearch
 {
   #define RECSEARCH_MAX_LEN 100
 
+  bool filter_matches(const char *text, const char *term);
+
   class cSearchParameter : public cListObject, public cRecordingFilter
   {
   friend class cSearchMenu;

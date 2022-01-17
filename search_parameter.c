@@ -1,6 +1,17 @@
 #include "search_parameter.h"
 
 
+bool filter_matches(const char *text, const char *term)
+{
+  if (text == NULL)
+     return false;
+
+  if (strlen(term) > 1 && term[0] == '^')
+     return strcasestr(text, term + 1) == NULL;
+
+  return strcasestr(text, term) != NULL;
+}
+
 class cParameterHelper
 {
 private:
@@ -216,28 +227,19 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording) const
             term += 2;
          }
 
-      if ((look_into & 1) != 0) {
-         text = info->Title();
-         if ((text != NULL) && (strcasestr(text, term) != NULL)) {
-            found++;
-            continue;
-            }
+      if ((look_into & 1) != 0 && filter_matches(info->Title(), term)) {
+         found++;
+         continue;
          }
 
-      if ((look_into & 2) != 0) {
-         text = info->ShortText();
-         if ((text != NULL) && (strcasestr(text, term) != NULL)) {
-            found++;
-            continue;
-            }
+      if ((look_into & 2) != 0 && filter_matches(info->ShortText(), term)) {
+         found++;
+         continue;
          }
 
-      if ((look_into & 4) != 0) {
-         text = info->Description();
-         if ((text != NULL) && (strcasestr(text, term) != NULL)) {
-            found++;
-            continue;
-            }
+      if ((look_into & 4) != 0 && filter_matches(info->Description(), term)) {
+         found++;
+         continue;
          }
 
       return false;
