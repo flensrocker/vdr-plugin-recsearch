@@ -3,11 +3,15 @@
 
 bool recsearch::filter_matches(const char *text, const char *term)
 {
+  if (strlen(term) > 1 && term[0] == '^') {
+     if (text == NULL)
+        return true;
+
+     return strcasestr(text, term + 1) == NULL;
+     }
+
   if (text == NULL)
      return false;
-
-  if (strlen(term) > 1 && term[0] == '^')
-     return strcasestr(text, term + 1) == NULL;
 
   return strcasestr(text, term) != NULL;
 }
