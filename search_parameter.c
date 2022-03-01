@@ -1,7 +1,7 @@
 #include "search_parameter.h"
 
 
-bool filter_matches(const char *text, const char *term)
+bool recsearch::filter_matches(const char *text, const char *term)
 {
   if (text == NULL)
      return false;
