@@ -275,6 +275,17 @@ static bool filter(const char *term, const char *title, const char *shorttext, c
         term += 2;
      }
 
+  // "not" search - term must match all of look_into
+  if (strlen(term) > 1 && term[0] == '^') {
+     if (((look_into & 1) == 0 || recsearch::filter_matches(title, term))
+      && ((look_into & 2) == 0 || recsearch::filter_matches(shorttext, term))
+      && ((look_into & 4) == 0 || recsearch::filter_matches(description, term))) {
+         return true;
+         }
+
+     return false;
+     }
+
   if ((look_into & 1) != 0 && recsearch::filter_matches(title, term))
      return true;
 

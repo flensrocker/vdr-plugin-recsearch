@@ -227,6 +227,18 @@ bool recsearch::cSearchParameter::Filter(const cRecording *Recording) const
             term += 2;
          }
 
+      // "not" search - term must match all of look_into
+      if (strlen(term) > 1 && term[0] == '^') {
+         if (((look_into & 1) == 0 || filter_matches(info->Title(), term))
+          && ((look_into & 2) == 0 || filter_matches(info->ShortText(), term))
+          && ((look_into & 4) == 0 || filter_matches(info->Description(), term))) {
+            found++;
+            continue;
+            }
+
+         return false;
+         }
+
       if ((look_into & 1) != 0 && filter_matches(info->Title(), term)) {
          found++;
          continue;
